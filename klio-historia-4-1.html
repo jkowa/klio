@@ -1,0 +1,932 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Wehikuł Czasu z Klio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@400;600;800&family=Caveat:wght@600&display=swap">
+<style>
+/* Layout: zeszyt w kratkę — jedna kolumna przystanków, każdy z ściągą i mini-grą; przyklejony pasek gwiazdek u góry */
+:root{
+  --paper:#f6f8fd; --grid:rgba(35,70,196,.075); --card:#ffffff; --soft:#eef2fc; --line:#d6ddf2;
+  --ink:#1b2559; --ink-soft:#4d5885; --blue:#2346c4; --blue-ink:#ffffff;
+  --hl:rgba(255,214,64,.6); --sun:#f5a524; --red:#d23a2e; --red-bg:#fde9e6; --green:#1a8f4c; --green-bg:#e3f6ea;
+  --land:#eef6dc; --water:#9cc7ef; --forest:#4f8a3a; --route:#9a5b22; --owl-belly:#d5e2ff;
+  --f-display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --f-body:"Nunito","Segoe UI",system-ui,sans-serif;
+  --f-hand:"Caveat","Comic Sans MS",cursive;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#11182f; --grid:rgba(150,170,255,.07); --card:#19223f; --soft:#1f2a4d; --line:#2f3b68;
+  --ink:#e9edff; --ink-soft:#a8b2d8; --blue:#8ea6ff; --blue-ink:#11182f;
+  --hl:rgba(255,214,64,.3); --red:#ff8a7e; --red-bg:#43201f; --green:#5ad693; --green-bg:#173a2a;
+  --land:#203828; --water:#2f5f8f; --forest:#7fc46a; --route:#e0a466; --owl-belly:#3c4f96; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#11182f; --grid:rgba(150,170,255,.07); --card:#19223f; --soft:#1f2a4d; --line:#2f3b68;
+  --ink:#e9edff; --ink-soft:#a8b2d8; --blue:#8ea6ff; --blue-ink:#11182f;
+  --hl:rgba(255,214,64,.3); --red:#ff8a7e; --red-bg:#43201f; --green:#5ad693; --green-bg:#173a2a;
+  --land:#203828; --water:#2f5f8f; --forest:#7fc46a; --route:#e0a466; --owl-belly:#3c4f96; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background-color:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.6;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:22px 22px;}
+.wrap{max-width:860px;margin:0 auto;padding-inline:16px;padding-block:0 64px}
+h1,h2,h3{font-family:var(--f-display);line-height:1.15;text-wrap:balance;margin:0}
+p{margin:0}
+b{font-weight:800}
+.hl{background:linear-gradient(transparent 52%,var(--hl) 52%);font-weight:800;padding-inline:2px}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:8px}
+
+/* hero */
+.hero{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;padding-block:32px 20px}
+.owl{width:120px;height:120px}
+.owl .lid{transform-origin:center;animation:blink 5s infinite}
+@keyframes blink{0%,94%,100%{transform:scaleY(0)}96%{transform:scaleY(1)}}
+.hero h1{font-size:clamp(2.1rem,6vw,3.2rem);font-weight:800;color:var(--blue)}
+.hero .lead{max-width:56ch;margin-top:6px;color:var(--ink-soft)}
+.hand{font-family:var(--f-hand);font-size:1.35rem;color:var(--blue);line-height:1.2}
+.hero .hand{margin-top:6px;transform:rotate(-1.5deg);display:inline-block}
+.hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.btn{display:inline-flex;align-items:center;gap:8px;border:2px solid var(--blue);background:var(--blue);color:var(--blue-ink);
+  padding:10px 18px;border-radius:999px;font-weight:800;text-decoration:none;font-size:1rem}
+.btn.ghost{background:transparent;color:var(--blue)}
+.btn:hover{filter:brightness(1.08)}
+@media (max-width:520px){.hero{grid-template-columns:1fr;text-align:left}.owl{width:92px;height:92px}}
+
+/* sticky bar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--paper);border-bottom:2px solid var(--line);
+  margin-inline:-16px;padding:10px 16px;display:flex;align-items:center;gap:14px}
+.bar-label{font-family:var(--f-display);font-weight:800;white-space:nowrap}
+.meter{flex:1;height:12px;border-radius:999px;background:var(--soft);border:2px solid var(--line);overflow:hidden;min-width:60px}
+.meter span{display:block;height:100%;width:0;background:var(--sun);transition:width .5s}
+.bar-count{font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* stops grid */
+.stops{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px;margin-block:22px 8px;padding:0;list-style:none}
+.stops a{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:12px;border:2px solid var(--line);
+  background:var(--card);color:var(--ink);text-decoration:none;min-height:74px;position:relative}
+.stops a:hover{border-color:var(--blue)}
+.stops .n{font-family:var(--f-display);font-weight:800;color:var(--blue);font-size:1.1rem;line-height:1}
+.stops .t{font-size:.92rem;font-weight:700;line-height:1.25}
+.stops .s{position:absolute;top:6px;right:9px;color:var(--line);font-size:1.1rem}
+.stops a.done .s{color:var(--sun)}
+.stops a.final{border-style:dashed;border-color:var(--blue)}
+
+/* topic */
+.topic{background:var(--card);border:2px solid var(--line);border-radius:16px;margin-top:26px;padding:22px 22px 24px;scroll-margin-top:70px}
+.topic-head{display:flex;gap:14px;align-items:flex-start}
+.num{flex:none;width:44px;height:44px;border-radius:50%;background:var(--blue);color:var(--blue-ink);display:grid;place-items:center;
+  font-family:var(--f-display);font-weight:800;font-size:1.3rem}
+.topic-head h2{font-size:1.5rem;flex:1;padding-top:6px}
+.star{flex:none;font-size:1.8rem;line-height:1;color:var(--line);padding-top:6px;transition:transform .3s}
+.star.on{color:var(--sun);transform:scale(1.15) rotate(-8deg)}
+.notes{margin-top:14px;display:grid;gap:10px;max-width:68ch}
+.notes .label{font-family:var(--f-hand);font-size:1.4rem;color:var(--blue);line-height:1}
+.notes ul,.notes ol{margin:0;padding-left:1.3em;display:grid;gap:4px}
+.tip{border-left:4px solid var(--sun);padding:6px 12px;background:var(--soft);border-radius:0 10px 10px 0}
+.rule{display:grid;gap:6px;background:var(--soft);border-radius:12px;padding:12px 14px}
+.rule .ex{font-variant-numeric:tabular-nums}
+
+/* game area */
+.game{margin-top:18px;border-top:2px dashed var(--line);padding-top:16px;display:grid;gap:14px}
+.game-title{font-family:var(--f-display);font-weight:800;font-size:1.1rem;display:flex;align-items:center;gap:8px}
+.game-title::before{content:"";width:12px;height:12px;border-radius:3px;background:var(--sun);transform:rotate(45deg)}
+.q{display:grid;gap:8px}
+.q-t{font-weight:800}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt,.chip,.bucket{border:2px solid var(--line);background:var(--card);border-radius:12px;padding:8px 14px;font-weight:700;text-align:left;line-height:1.35}
+.opt:hover:not([disabled]),.chip:hover:not([disabled]),.bucket:hover:not([disabled]){border-color:var(--blue)}
+.opt[disabled]{cursor:default}
+.right{border-color:var(--green)!important;background:var(--green-bg)!important;color:var(--ink)}
+.wrong{border-color:var(--red)!important;background:var(--red-bg)!important}
+.chip.sel{border-color:var(--blue);background:var(--soft);box-shadow:inset 0 0 0 1px var(--blue)}
+.chip.missed{border-style:dashed;border-color:var(--green)}
+.fb{font-size:.95rem;color:var(--ink-soft)}
+.fb b.ok{color:var(--green)} .fb b.no{color:var(--red)}
+.foot{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.score{font-weight:800}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+.sort-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 10px;border:2px solid var(--line);border-radius:12px}
+.sort-row .it{flex:1 1 220px;font-weight:700;min-width:0}
+.sort-row .bks{display:flex;gap:6px;flex-wrap:wrap}
+.sort-row .bucket{padding:6px 12px;font-size:.92rem}
+.sort-row .note{flex-basis:100%;font-size:.92rem;color:var(--ink-soft)}
+.sort-row.ok{border-color:var(--green);background:var(--green-bg)}
+
+.order-pool{display:flex;flex-wrap:wrap;gap:8px}
+.chip .badge{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--green);color:var(--card);font-size:.85rem;margin-right:6px}
+.chip .dt{display:block;font-size:.85rem;color:var(--ink-soft);font-weight:600}
+
+/* clocks */
+.clocks{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.clock{border:2px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:6px;align-content:start;min-width:0}
+.clock svg{width:64px;height:64px}
+.clock h3{font-size:1.1rem}
+.clock .era{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;font-weight:800;color:var(--blue)}
+.clock p{font-size:.93rem}
+
+/* tables */
+.scroll{overflow-x:auto}
+.roman{border-collapse:collapse;font-variant-numeric:tabular-nums}
+.roman td{border:2px solid var(--line);padding:6px 12px;text-align:center;font-weight:800}
+.roman tr:first-child td{font-family:var(--f-display);font-size:1.3rem;color:var(--blue)}
+
+/* tools */
+.tool{display:grid;gap:10px;background:var(--soft);border-radius:14px;padding:14px}
+.tool-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.tool input,.tool select{font:inherit;font-weight:800;padding:8px 12px;border-radius:10px;border:2px solid var(--line);background:var(--card);color:var(--ink);width:9em;max-width:100%}
+.tool input:focus,.tool select:focus{border-color:var(--blue);outline:none}
+.big-out{font-family:var(--f-display);font-size:1.6rem;font-weight:800;color:var(--blue);line-height:1.2}
+.small{font-size:.92rem;color:var(--ink-soft)}
+
+/* timeline + map */
+.axis{min-width:560px;width:100%;height:auto;display:block}
+.axis text{fill:var(--ink);font-family:var(--f-body);font-size:12px}
+.axis .yr{font-weight:800;fill:var(--blue)}
+.mapbox{display:grid;grid-template-columns:minmax(0,1fr) 210px;gap:14px;align-items:start}
+@media (max-width:640px){.mapbox{grid-template-columns:1fr}}
+.map{width:100%;height:auto;display:block;border:2px solid var(--line);border-radius:12px;background:var(--water)}
+.map text{font-family:var(--f-body);fill:var(--ink);font-size:12px;font-weight:700}
+.map .title{font-family:var(--f-display);font-size:15px;letter-spacing:.18em;fill:var(--ink-soft)}
+.map .m-sym{transition:opacity .25s}
+.map[data-focus] .m-sym{opacity:.15}
+.map[data-focus="castle"] .m-castle,.map[data-focus="grod"] .m-grod,.map[data-focus="battle"] .m-battle,
+.map[data-focus="border"] .m-border,.map[data-focus="route"] .m-route,.map[data-focus="river"] .m-river,.map[data-focus="forest"] .m-forest{opacity:1}
+.map .m-battle{cursor:pointer}
+.map .m-ruler{display:none}
+.map.ruler .m-ruler{display:inline}
+.legend{border:2px solid var(--line);border-radius:12px;padding:10px;display:grid;gap:4px;background:var(--card)}
+.legend h3{font-size:1rem}
+.legend button{display:flex;align-items:center;gap:10px;border:0;background:none;padding:5px 6px;border-radius:8px;text-align:left;font-weight:700;font-size:.92rem}
+.legend button:hover,.legend button[aria-pressed="true"]{background:var(--soft)}
+.legend svg{width:34px;height:20px;flex:none}
+
+/* final quiz */
+.quiz-card{display:grid;gap:12px;background:var(--soft);border-radius:14px;padding:18px}
+.quiz-top{display:flex;justify-content:space-between;gap:10px;font-weight:800;font-variant-numeric:tabular-nums;flex-wrap:wrap}
+.quiz-q{font-family:var(--f-display);font-size:1.35rem;font-weight:800;line-height:1.25}
+.quiz-card .opts{display:grid;gap:8px}
+.grade{font-family:var(--f-display);font-size:3rem;font-weight:800;color:var(--blue);line-height:1}
+.review{display:grid;gap:6px;padding-left:1.2em;margin:0}
+.review a{color:var(--blue);font-weight:800}
+
+.toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translate(-50%,140%);background:var(--ink);color:var(--paper);
+  padding:10px 18px;border-radius:999px;font-weight:800;z-index:50;transition:transform .35s;max-width:calc(100% - 32px);text-align:center}
+.toast.show{transform:translate(-50%,0)}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:40;width:100%;height:100%}
+footer{margin-top:30px;text-align:center;color:var(--ink-soft);font-size:.9rem}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<canvas id="confetti" hidden></canvas>
+<div class="wrap">
+
+<header class="hero">
+  <svg class="owl" viewBox="0 0 120 120" aria-hidden="true">
+    <polygon points="24,40 30,12 48,32" fill="var(--blue)"/><polygon points="96,40 90,12 72,32" fill="var(--blue)"/>
+    <ellipse cx="60" cy="70" rx="40" ry="44" fill="var(--blue)"/>
+    <ellipse cx="60" cy="84" rx="25" ry="27" fill="var(--owl-belly)"/>
+    <path d="M44 84q4 4 8 0M56 92q4 4 8 0M68 84q4 4 8 0" stroke="var(--blue)" stroke-width="2" fill="none"/>
+    <circle cx="43" cy="56" r="15" fill="#fff"/><circle cx="77" cy="56" r="15" fill="#fff"/>
+    <circle cx="45" cy="58" r="7" fill="#1b2559"/><circle cx="79" cy="58" r="7" fill="#1b2559"/>
+    <circle cx="47" cy="55" r="2" fill="#fff"/><circle cx="81" cy="55" r="2" fill="#fff"/>
+    <g class="lid"><circle cx="43" cy="56" r="15.5" fill="var(--blue)"/><circle cx="77" cy="56" r="15.5" fill="var(--blue)"/></g>
+    <circle cx="43" cy="56" r="16" fill="none" stroke="var(--sun)" stroke-width="3"/><circle cx="77" cy="56" r="16" fill="none" stroke="var(--sun)" stroke-width="3"/>
+    <path d="M59 56h2" stroke="var(--sun)" stroke-width="3"/>
+    <polygon points="54,68 66,68 60,79" fill="var(--sun)"/>
+    <path d="M46 112l-4 5M52 112v6M68 112v6M74 112l4 5" stroke="var(--sun)" stroke-width="3" stroke-linecap="round"/>
+  </svg>
+  <div>
+    <h1>Wehikuł Czasu z Klio</h1>
+    <p class="lead">Powtórka przed sprawdzianem z historii dla 4 klasy. Przejdź 13 przystanków: przeczytaj ściągę, zagraj w mini-grę i zdobądź gwiazdkę. Na końcu czeka Wielki Sprawdzian z oceną.</p>
+    <span class="hand">Jestem sowa Klio. Tak nazywała się grecka muza historii!</span>
+    <div class="hero-actions">
+      <a class="btn" href="#t1">Ruszamy w podróż</a>
+      <a class="btn ghost" href="#quiz">Od razu na sprawdzian</a>
+    </div>
+  </div>
+</header>
+
+<div class="bar">
+  <span class="bar-label">Twoje gwiazdki</span>
+  <div class="meter" aria-hidden="true"><span id="meter"></span></div>
+  <span class="bar-count" id="count">0 / 13 ★</span>
+</div>
+
+<ul class="stops" id="stops"></ul>
+
+<!-- 1 -->
+<section class="topic" id="t1">
+  <div class="topic-head"><span class="num">1</span><h2>Co to jest historia i kim są historycy?</h2><span class="star" data-star="1">★</span></div>
+  <div class="notes">
+    <span class="label">Ściąga</span>
+    <p><span class="hl">Historia</span> to nauka o przeszłości. Opowiada, jak dawniej żyli ludzie, co budowali, w co wierzyli i jakie wydarzenia zmieniły świat.</p>
+    <p>Słowo „historia” pochodzi z języka greckiego i znaczy mniej więcej „badanie, dowiadywanie się”.</p>
+    <p><span class="hl">Historycy</span> to naukowcy, którzy badają przeszłość. Szukają śladów dawnych czasów, czytają stare dokumenty, porównują je i opisują, co naprawdę się wydarzyło. „Ojcem historii” nazywamy Greka <b>Herodota</b>, który żył w V wieku p.n.e.</p>
+    <p class="tip">Historyk działa jak detektyw: zbiera dowody (źródła) i sprawdza, czy do siebie pasują.</p>
+  </div>
+  <div class="game"><div class="game-title">Prawda czy fałsz?</div><div id="g1"></div></div>
+</section>
+
+<!-- 2 -->
+<section class="topic" id="t2">
+  <div class="topic-head"><span class="num">2</span><h2>Po co uczymy się historii?</h2><span class="star" data-star="2">★</span></div>
+  <div class="notes">
+    <span class="label">Ściąga</span>
+    <p>Historii uczymy się, żeby:</p>
+    <ul>
+      <li>lepiej <b>rozumieć świat</b>, w którym żyjemy dziś (wiele rzeczy ma swój początek w przeszłości),</li>
+      <li>poznać losy <b>przodków</b>, naszej rodziny i ojczyzny,</li>
+      <li><b>uczyć się</b> na błędach i sukcesach ludzi z dawnych czasów,</li>
+      <li>znać i szanować <b>tradycje</b> oraz dziedzictwo, które po nich otrzymaliśmy.</li>
+    </ul>
+  </div>
+  <div class="game"><div class="game-title">Zaznacz wszystkie dobre powody</div><div id="g2"></div></div>
+</section>
+
+<!-- 3 -->
+<section class="topic" id="t3">
+  <div class="topic-head"><span class="num">3</span><h2>Co to są daty i do czego służą?</h2><span class="star" data-star="3">★</span></div>
+  <div class="notes">
+    <span class="label">Ściąga</span>
+    <p><span class="hl">Data</span> mówi, kiedy coś się wydarzyło. Pełna data to dzień, miesiąc i rok, np. <b>11 listopada 1918 r.</b> (odzyskanie niepodległości przez Polskę).</p>
+    <p>Czasem znamy tylko rok, np. <b>966 r.</b> (chrzest Polski). Jeśli nie znamy dokładnej daty, piszemy <b>ok.</b> (około), np. ok. 2560 r. p.n.e.</p>
+    <p>Daty pozwalają:</p>
+    <ul>
+      <li>ułożyć wydarzenia w kolejności (co było wcześniej, a co później),</li>
+      <li>obliczyć, ile lat minęło od wydarzenia,</li>
+      <li>obchodzić rocznice i święta.</li>
+    </ul>
+    <div class="rule"><b>Ile lat minęło?</b><span class="ex">Od późniejszego roku odejmij wcześniejszy: 2026 − 966 = 1060 lat.</span></div>
+  </div>
+  <div class="game"><div class="game-title">Sprawdź się</div><div id="g3"></div></div>
+</section>
+
+<!-- 4 -->
+<section class="topic" id="t4">
+  <div class="topic-head"><span class="num">4</span><h2>Jak mierzymy czas? Ery</h2><span class="star" data-star="4">★</span></div>
+  <div class="notes">
+    <span class="label">Ściąga</span>
+    <p><span class="hl">Era</span> to bardzo długi okres, liczony od jakiegoś ważnego wydarzenia. My liczymy lata od <b>narodzin Jezusa Chrystusa</b>.</p>
+    <ul>
+      <li>Wszystko, co było później, to lata <b>naszej ery</b>, w skrócie <b>n.e.</b> (np. 966 r. n.e.). Zwykle tego skrótu nie dopisujemy.</li>
+      <li>Wszystko, co było wcześniej, to lata <b>przed naszą erą</b>, w skrócie <b>p.n.e.</b> (np. 753 r. p.n.e.).</li>
+    </ul>
+    <p class="tip">Lata p.n.e. liczymy <b>do tyłu</b>: im większa liczba, tym dawniej. 500 r. p.n.e. był wcześniej niż 200 r. p.n.e.!</p>
+    <p class="tip">Nie było roku zerowego. Zaraz po 1 r. p.n.e. nastąpił 1 r. n.e.</p>
+    <p>Inne ludy liczą lata od innych wydarzeń. Na przykład muzułmanie liczą je od ucieczki proroka Mahometa z Mekki do Medyny w 622 r.</p>
+  </div>
+  <div class="game"><div class="game-title">Która data była wcześniej?</div><div id="g4"></div></div>
+</section>
+
+<!-- 5 -->
+<section class="topic" id="t5">
+  <div class="topic-head"><span class="num">5</span><h2>Oś czasu: co to jest i jak ją narysować?</h2><span class="star" data-star="5">★</span></div>
+  <div class="notes">
+    <span class="label">Ściąga</span>
+    <p><span class="hl">Oś czasu</span> to linia, na której zaznaczamy wydarzenia w kolejności, w jakiej się działy. Dzięki niej od razu widać, co było wcześniej, a co później.</p>
+    <p><b>Jak ją narysować?</b></p>
+    <ol>
+      <li>Narysuj poziomą linię ze strzałką w prawo. Strzałka pokazuje, że czas płynie ku przyszłości.</li>
+      <li>Zaznacz punkt narodzin Chrystusa. Na lewo od niego są lata p.n.e., na prawo lata n.e.</li>
+      <li>Podziel linię na <b>równe</b> odcinki, np. co 100 albo co 500 lat, i podpisz je.</li>
+      <li>Zaznacz wydarzenia kropkami w odpowiednich miejscach i podpisz je.</li>
+    </ol>
+  </div>
+  <div class="scroll" style="margin-top:14px">
+    <svg class="axis" viewBox="0 0 680 150" role="img" aria-label="Przykładowa oś czasu od 2000 r. p.n.e. do 2000 r. n.e.">
+      <defs><marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--ink)"/></marker></defs>
+      <line x1="20" y1="80" x2="668" y2="80" stroke="var(--ink)" stroke-width="2.5" marker-end="url(#arr)"/>
+      <g stroke="var(--ink)" stroke-width="2">
+        <line x1="40" y1="74" x2="40" y2="86"/><line x1="115" y1="74" x2="115" y2="86"/><line x1="190" y1="74" x2="190" y2="86"/><line x1="265" y1="74" x2="265" y2="86"/>
+        <line x1="415" y1="74" x2="415" y2="86"/><line x1="490" y1="74" x2="490" y2="86"/><line x1="565" y1="74" x2="565" y2="86"/><line x1="640" y1="74" x2="640" y2="86"/>
+      </g>
+      <g text-anchor="middle">
+        <text x="40" y="102">2000</text><text x="115" y="102">1500</text><text x="190" y="102">1000</text><text x="265" y="102">500</text>
+        <text x="415" y="102">500</text><text x="490" y="102">1000</text><text x="565" y="102">1500</text><text x="640" y="102">2000</text>
+        <text x="152" y="140" font-weight="800">← p.n.e. (liczymy do tyłu)</text>
+        <text x="528" y="140" font-weight="800">n.e. →</text>
+        <text x="340" y="120" class="yr">narodziny Chrystusa</text>
+      </g>
+      <polygon points="340,70 344,78 352,80 344,82 340,90 336,82 328,80 336,78" fill="var(--sun)" stroke="var(--ink)" stroke-width="1"/>
+      <g fill="var(--blue)"><circle cx="227" cy="80" r="5"/><circle cx="485" cy="80" r="5"/><circle cx="551" cy="80" r="5"/><circle cx="628" cy="80" r="5"/></g>
+      <g stroke="var(--blue)" stroke-width="1.5"><line x1="227" y1="75" x2="227" y2="38"/><line x1="485" y1="75" x2="485" y2="64"/><line x1="551" y1="75" x2="551" y2="38"/><line x1="628" y1="75" x2="628" y2="64"/></g>
+      <g text-anchor="middle">
+        <text x="227" y="20" class="yr">753 p.n.e.</text><text x="227" y="33">założenie Rzymu</text>
+        <text x="485" y="46" class="yr">966</text><text x="485" y="59">chrzest Polski</text>
+        <text x="551" y="20" class="yr">1410</text><text x="551" y="33">Grunwald</text>
+        <text x="628" y="46" class="yr">1918</text><text x="628" y="59">niepodległość</text>
+      </g>
+    </svg>
+  </div>
+  <div class="game"><div class="game-title">Ułóż wydarzenia od najdawniejszego</div><div id="g5"></div></div>
+</section>
+
+<!-- 6 -->
+<section class="topic" id="t6">
+  <div class="topic-head"><span class="num">6</span><h2>Kalendarz: co to jest i do czego służy?</h2><span class="star" data-star="6">★</span></div>
+  <div class="notes">
+    <span class="label">Ściąga</span>
+    <p><span class="hl">Kalendarz</span> to sposób dzielenia czasu na dni, tygodnie, miesiące i lata. Dzięki niemu zapisujemy daty, planujemy i pamiętamy o świętach.</p>
+    <ul>
+      <li>tydzień ma <b>7 dni</b>, rok ma <b>12 miesięcy</b>,</li>
+      <li>zwykły rok ma <b>365 dni</b>, a co 4 lata jest <b>rok przestępny</b>: 366 dni, bo luty ma wtedy 29 dni,</li>
+      <li>dawniej ludzie tworzyli kalendarze, obserwując Słońce, Księżyc i pory roku.</li>
+    </ul>
+    <p>Dziś używamy <b>kalendarza gregoriańskiego</b>. Wprowadził go w 1582 r. papież <b>Grzegorz XIII</b>. Wcześniej obowiązywał kalendarz juliański, który wprowadził rzymski wódz Juliusz Cezar.</p>
+  </div>
+  <div class="game"><div class="game-title">Kalendarzowy quiz</div><div id="g6"></div></div>
+</section>
+
+<!-- 7 -->
+<section class="topic" id="t7">
+  <div class="topic-head"><span class="num">7</span><h2>Jak dawniej i dziś mierzymy czas?</h2><span class="star" data-star="7">★</span></div>
+  <div class="notes">
+    <span class="label">Ściąga</span>
+    <p>Najdawniej ludzie mierzyli czas, patrząc w niebo: <b>Słońce</b> wyznaczało dzień i noc, <b>Księżyc</b> miesiące, a <b>pory roku</b> cały rok. Potem wymyślili zegary.</p>
+  </div>
+  <div class="clocks" style="margin-top:14px">
+    <div class="clock">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="38" r="24" fill="var(--soft)" stroke="var(--ink)" stroke-width="2"/><path d="M32 38L32 14L44 38Z" fill="var(--blue)"/><path d="M32 38L14 50" stroke="var(--ink-soft)" stroke-width="3" stroke-linecap="round"/><circle cx="54" cy="10" r="6" fill="var(--sun)"/></svg>
+      <span class="era">od starożytności</span><h3>Zegar słoneczny</h3>
+      <p>Cień pręcika przesuwa się po tarczy razem ze Słońcem i wskazuje godzinę. Nie działa w nocy ani w pochmurny dzień.</p>
+    </div>
+    <div class="clock">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M16 6h32M16 58h32" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/><path d="M20 8C20 24 44 24 44 8ZM20 56C20 40 44 40 44 56Z" fill="var(--soft)" stroke="var(--ink)" stroke-width="2"/><path d="M24 54C26 46 38 46 40 54Z" fill="var(--sun)"/><path d="M26 12C28 18 36 18 38 12Z" fill="var(--sun)"/><line x1="32" y1="24" x2="32" y2="46" stroke="var(--sun)" stroke-width="2" stroke-dasharray="2 3"/></svg>
+      <span class="era">znana od średniowiecza</span><h3>Klepsydra</h3>
+      <p>Piasek przesypuje się z górnej części do dolnej w określonym czasie. Mierzy krótkie chwile, np. 3 minuty. Trzeba ją odwracać.</p>
+    </div>
+    <div class="clock">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="26" r="20" fill="var(--soft)" stroke="var(--ink)" stroke-width="2"/><path d="M32 26V13M32 26l9 5" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/><line x1="32" y1="46" x2="26" y2="60" stroke="var(--ink-soft)" stroke-width="2"/><circle cx="26" cy="60" r="3.5" fill="var(--blue)"/></svg>
+      <span class="era">od średniowiecza</span><h3>Zegar mechaniczny</h3>
+      <p>Ma tarczę, wskazówki i koła zębate poruszane ciężarkami, sprężyną albo wahadłem. Dawniej montowano go na wieżach ratuszy i kościołów.</p>
+    </div>
+    <div class="clock">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><rect x="6" y="16" width="52" height="32" rx="8" fill="var(--soft)" stroke="var(--ink)" stroke-width="2"/><text x="32" y="38" text-anchor="middle" font-family="monospace" font-weight="700" font-size="16" fill="var(--blue)">12:30</text></svg>
+      <span class="era">XX wiek i dziś</span><h3>Zegar elektroniczny</h3>
+      <p>Działa na baterię albo prąd i zwykle pokazuje godzinę cyframi. Jest bardzo dokładny. Masz go w telefonie, komputerze i mikrofalówce.</p>
+    </div>
+  </div>
+  <div class="game"><div class="game-title">Jaki to zegar?</div><div id="g7"></div></div>
+</section>
+
+<!-- 8 -->
+<section class="topic" id="t8">
+  <div class="topic-head"><span class="num">8</span><h2>Wiek i tysiąclecie</h2><span class="star" data-star="8">★</span></div>
+  <div class="notes">
+    <span class="label">Ściąga</span>
+    <p><span class="hl">Wiek</span> (stulecie) to 100 lat. <span class="hl">Tysiąclecie</span> to 1000 lat. Wieki zapisujemy cyframi rzymskimi.</p>
+    <p>I wiek n.e. to lata 1–100, X wiek to lata 901–1000, a XXI wiek (nasz!) to lata 2001–2100.</p>
+    <div class="rule">
+      <b>Jak obliczyć wiek z daty?</b>
+      <span class="ex">1. Rok kończy się na „00”? Skreśl dwa zera: <b>1900 → 19 → XIX wiek</b>.</span>
+      <span class="ex">2. W innym wypadku zakryj dwie ostatnie cyfry i dodaj 1: <b>9̲66 → 9 + 1 = 10 → X wiek</b>.</span>
+      <span class="ex">Lata p.n.e. liczymy tak samo: 753 r. p.n.e. → 7 + 1 → VIII wiek p.n.e.</span>
+    </div>
+    <div class="rule">
+      <b>A tysiąclecie?</b>
+      <span class="ex">Tak samo, tylko zakrywamy trzy ostatnie cyfry: 966 → 0 + 1 → <b>I tysiąclecie</b>, 2026 → 2 + 1 → <b>III tysiąclecie</b>.</span>
+    </div>
+  </div>
+  <div class="tool" style="margin-top:14px">
+    <b>Kalkulator wieków</b>
+    <div class="tool-row">
+      <label for="cy-year" class="small">Rok</label><input id="cy-year" type="number" min="1" max="4000" value="966">
+      <label for="cy-era" class="small">era</label>
+      <select id="cy-era"><option value="ne">n.e.</option><option value="pne">p.n.e.</option></select>
+    </div>
+    <div class="big-out" id="cy-out"></div>
+    <div class="small" id="cy-why"></div>
+  </div>
+  <div class="game"><div class="game-title">Trening: zdobądź 5 trafień</div><div id="g8"></div></div>
+</section>
+
+<!-- 9 -->
+<section class="topic" id="t9">
+  <div class="topic-head"><span class="num">9</span><h2>Cyfry rzymskie</h2><span class="star" data-star="9">★</span></div>
+  <div class="notes">
+    <span class="label">Ściąga</span>
+    <p>Starożytni Rzymianie zapisywali liczby literami. Wystarczy zapamiętać siedem znaków:</p>
+    <div class="scroll"><table class="roman"><tr><td>I</td><td>V</td><td>X</td><td>L</td><td>C</td><td>D</td><td>M</td></tr><tr><td>1</td><td>5</td><td>10</td><td>50</td><td>100</td><td>500</td><td>1000</td></tr></table></div>
+    <ul>
+      <li>Mniejsza cyfra <b>za</b> większą: <b>dodajemy</b>. VI = 5 + 1 = 6, XV = 15.</li>
+      <li>Mniejsza cyfra <b>przed</b> większą: <b>odejmujemy</b>. IV = 4, IX = 9, XL = 40, XC = 90, CD = 400, CM = 900.</li>
+      <li>Ten sam znak piszemy obok siebie najwyżej <b>3 razy</b> (III, ale nie IIII). V, L i D nigdy się nie powtarzają.</li>
+    </ul>
+    <p><b>Gdzie je spotkamy w historii?</b> W numerach wieków (XX wiek), w imionach władców (Jan III Sobieski, Bolesław I Chrobry), na pomnikach i budynkach, na tarczach zegarów.</p>
+    <div class="rule"><span class="ex"><b>2026 = MM + XX + VI = MMXXVI</b> (1000 + 1000 + 10 + 10 + 5 + 1)</span></div>
+  </div>
+  <div class="tool" style="margin-top:14px">
+    <b>Tłumacz liczb</b>
+    <div class="tool-row">
+      <label for="rn-num" class="small">Liczba</label><input id="rn-num" type="number" min="1" max="3999" value="2026">
+      <span class="big-out" id="rn-out1"></span>
+    </div>
+    <div class="tool-row">
+      <label for="rn-rom" class="small">Rzymska</label><input id="rn-rom" type="text" value="CMLXVI" autocapitalize="characters" spellcheck="false">
+      <span class="big-out" id="rn-out2"></span>
+    </div>
+  </div>
+  <div class="game"><div class="game-title">Rzymska zagadka</div><div id="g9"></div></div>
+</section>
+
+<!-- 10 -->
+<section class="topic" id="t10">
+  <div class="topic-head"><span class="num">10</span><h2>Mapa historyczna</h2><span class="star" data-star="10">★</span></div>
+  <div class="notes">
+    <span class="label">Ściąga</span>
+    <p><span class="hl">Mapa geograficzna</span> pokazuje świat taki, jaki jest dziś: góry, rzeki, morza, miasta.</p>
+    <p><span class="hl">Mapa historyczna</span> pokazuje, jak było <b>w przeszłości</b>: dawne państwa i ich granice, bitwy, szlaki handlowe, wędrówki ludów.</p>
+    <p><span class="hl">Legenda</span> to objaśnienie znaków (symboli) i kolorów użytych na mapie.</p>
+    <p><span class="hl">Skala</span> mówi, ile razy teren został zmniejszony. Dzięki niej obliczysz odległości, np. 1 cm na mapie to 10 km w terenie.</p>
+    <p><b>Jak czytać mapę historyczną?</b></p>
+    <ol>
+      <li>Przeczytaj tytuł: dowiesz się, jakiego miejsca i czasu dotyczy mapa.</li>
+      <li>Sprawdź legendę, żeby zrozumieć znaki.</li>
+      <li>Odszukaj znaki na mapie.</li>
+      <li>Użyj skali, żeby zmierzyć odległości, a róży wiatrów, żeby odczytać kierunki.</li>
+    </ol>
+  </div>
+  <div class="game">
+    <div class="game-title">Wyprawa po zmyślonej krainie</div>
+    <p class="small">Kliknij znak w legendzie, a podświetli się na mapie.</p>
+    <div class="mapbox">
+      <svg class="map" id="map" viewBox="0 0 600 360" role="img" aria-label="Zmyślona mapa historyczna Królestwa Sowiogrodu w XII wieku">
+        <path d="M40 22 L520 8 L590 120 L580 300 L500 352 L90 350 L12 260 L18 90Z" fill="var(--land)"/>
+        <g class="m-sym m-river"><path d="M40 20 C120 80 200 40 255 120 S330 300 430 352" fill="none" stroke="var(--water)" stroke-width="8" stroke-linecap="round"/>
+          <text x="166" y="58" transform="rotate(18 166 58)" fill="var(--blue)">rz. Wstęga</text></g>
+        <g class="m-sym m-forest" fill="var(--forest)">
+          <path d="M400 80l8 16h-16z"/><path d="M420 70l8 16h-16z"/><path d="M440 86l8 16h-16z"/><path d="M412 98l8 16h-16z"/>
+          <path d="M110 240l8 16h-16z"/><path d="M130 230l8 16h-16z"/><path d="M96 258l8 16h-16z"/></g>
+        <g class="m-sym m-border"><path d="M70 50 L500 30 L560 190 L470 330 L110 320 L40 180Z" fill="none" stroke="var(--red)" stroke-width="3" stroke-dasharray="10 6"/></g>
+        <g class="m-sym m-route"><path d="M10 140 Q80 150 150 160 L350 160 Q460 150 590 110" fill="none" stroke="var(--route)" stroke-width="3" stroke-dasharray="2 6" stroke-linecap="round"/></g>
+        <text class="title" x="300" y="112" text-anchor="middle">KRÓLESTWO SOWIOGRODU</text>
+        <g class="m-sym m-castle" fill="var(--ink)">
+          <path transform="translate(150 160)" d="M-12 9V-9h5v4h4v-4h6v4h4v-4h5V9Z"/><text x="150" y="186" text-anchor="middle">Zamek Pióro</text>
+          <path transform="translate(250 255)" d="M-12 9V-9h5v4h4v-4h6v4h4v-4h5V9Z"/><text x="250" y="281" text-anchor="middle">Zamek Puchacz</text>
+        </g>
+        <g class="m-sym m-grod"><circle cx="350" cy="160" r="10" fill="var(--land)" stroke="var(--ink)" stroke-width="4" stroke-dasharray="3 2"/><text x="350" y="186" text-anchor="middle">Gród Dziupla</text></g>
+        <g class="m-sym m-battle" id="battle">
+          <circle cx="450" cy="238" r="18" fill="transparent"/>
+          <path d="M441 229L459 247M459 229L441 247M439 241l6 6M461 241l-6 6" stroke="var(--red)" stroke-width="3.5" stroke-linecap="round"/>
+          <text x="450" y="268" text-anchor="middle">1187</text></g>
+        <g class="m-ruler"><line x1="150" y1="146" x2="350" y2="146" stroke="var(--blue)" stroke-width="3"/>
+          <g stroke="var(--blue)" stroke-width="3"><line x1="150" y1="138" x2="150" y2="154"/><line x1="250" y1="138" x2="250" y2="154"/><line x1="350" y1="138" x2="350" y2="154"/></g>
+          <text x="200" y="138" text-anchor="middle" fill="var(--blue)">20 km</text><text x="300" y="138" text-anchor="middle" fill="var(--blue)">20 km</text></g>
+        <g transform="translate(560 300)"><path d="M0 -26L7 0L0 -6L-7 0Z" fill="var(--ink)"/><text x="0" y="-31" text-anchor="middle">Pn</text></g>
+        <g><line x1="30" y1="345" x2="130" y2="345" stroke="var(--ink)" stroke-width="4"/><line x1="80" y1="345" x2="130" y2="345" stroke="var(--land)" stroke-width="2"/>
+          <g stroke="var(--ink)" stroke-width="2"><line x1="30" y1="338" x2="30" y2="352"/><line x1="80" y1="340" x2="80" y2="350"/><line x1="130" y1="338" x2="130" y2="352"/></g>
+          <text x="30" y="333" text-anchor="middle">0</text><text x="80" y="333" text-anchor="middle">10</text><text x="136" y="333" text-anchor="middle">20 km</text></g>
+      </svg>
+      <div class="legend" id="legend">
+        <h3>Legenda</h3>
+        <button data-k="castle" aria-pressed="false"><svg viewBox="0 0 34 20"><path transform="translate(17 10)" d="M-10 8V-8h4v4h4v-4h4v4h4v-4h4V8Z" fill="var(--ink)"/></svg>zamek</button>
+        <button data-k="grod" aria-pressed="false"><svg viewBox="0 0 34 20"><circle cx="17" cy="10" r="6.5" fill="none" stroke="var(--ink)" stroke-width="3" stroke-dasharray="3 2"/></svg>gród</button>
+        <button data-k="battle" aria-pressed="false"><svg viewBox="0 0 34 20"><path d="M10 3L24 17M24 3L10 17" stroke="var(--red)" stroke-width="3" stroke-linecap="round"/></svg>bitwa i jej rok</button>
+        <button data-k="border" aria-pressed="false"><svg viewBox="0 0 34 20"><line x1="2" y1="10" x2="32" y2="10" stroke="var(--red)" stroke-width="3" stroke-dasharray="7 4"/></svg>granica królestwa</button>
+        <button data-k="route" aria-pressed="false"><svg viewBox="0 0 34 20"><line x1="2" y1="10" x2="32" y2="10" stroke="var(--route)" stroke-width="3" stroke-dasharray="2 5" stroke-linecap="round"/></svg>szlak kupiecki</button>
+        <button data-k="river" aria-pressed="false"><svg viewBox="0 0 34 20"><path d="M2 12C10 4 20 18 32 8" fill="none" stroke="var(--water)" stroke-width="5"/></svg>rzeka</button>
+        <button data-k="forest" aria-pressed="false"><svg viewBox="0 0 34 20"><path d="M11 3l7 14H4zM24 3l7 14H17z" fill="var(--forest)"/></svg>las</button>
+        <button id="ruler-btn" style="margin-top:6px;border:2px dashed var(--line)">Pokaż linijkę</button>
+      </div>
+    </div>
+    <div class="q"><p class="q-t">Zadanie 1. Kliknij na mapie miejsce bitwy.</p><p class="fb" id="battle-fb">Wskazówka: sprawdź w legendzie, jak wygląda znak bitwy.</p></div>
+    <div id="g10"></div>
+  </div>
+</section>
+
+<!-- 11 -->
+<section class="topic" id="t11">
+  <div class="topic-head"><span class="num">11</span><h2>Źródła historyczne</h2><span class="star" data-star="11">★</span></div>
+  <div class="notes">
+    <span class="label">Ściąga</span>
+    <p><span class="hl">Źródło historyczne</span> to wszystko, co pozostało po ludziach z przeszłości i co mówi nam, jak dawniej żyli. Dzielimy je na dwie grupy:</p>
+    <ul>
+      <li><b>pisane</b>: wszystko, co zostało napisane, np. kroniki, listy, dokumenty, pamiętniki, książki, stare gazety,</li>
+      <li><b>niepisane</b>, a wśród nich:
+        <ul>
+          <li><b>materialne</b>: przedmioty i budowle (narzędzia, broń, monety, ubrania, zamki),</li>
+          <li><b>ikonograficzne</b>: obrazy, rysunki, zdjęcia, mapy,</li>
+          <li><b>ustne</b>: opowieści, legendy, piosenki przekazywane z ust do ust,</li>
+          <li><b>audiowizualne</b>: filmy i nagrania dźwiękowe.</li>
+        </ul></li>
+    </ul>
+    <p><b>Jakie pytania zadajemy źródłu?</b></p>
+    <ul><li>Co to jest?</li><li>Kto je stworzył?</li><li>Kiedy i gdzie powstało?</li><li>Po co (dla kogo) powstało?</li><li>Czego się z niego dowiadujemy?</li></ul>
+    <p>Ze źródeł dowiadujemy się, jak ludzie mieszkali, ubierali się, co jedli, w co wierzyli, czym się zajmowali i jakie wydarzenia przeżyli.</p>
+    <p class="tip">Uwaga: autor źródła mógł się mylić albo coś ukrywać. Dlatego historycy porównują kilka źródeł.</p>
+  </div>
+  <div class="game"><div class="game-title">Pisane czy niepisane?</div><div id="g11"></div></div>
+</section>
+
+<!-- 12 -->
+<section class="topic" id="t12">
+  <div class="topic-head"><span class="num">12</span><h2>Kim są archeolodzy?</h2><span class="star" data-star="12">★</span></div>
+  <div class="notes">
+    <span class="label">Ściąga</span>
+    <p><span class="hl">Archeolog</span> bada przeszłość, szukając śladów ukrytych w ziemi (a czasem pod wodą). Bada głównie <b>źródła materialne</b>: narzędzia, naczynia, kości, monety, resztki domów. Jest szczególnie ważny tam, gdzie nie zachowało się żadne pismo.</p>
+    <p>Prace w terenie to <span class="hl">wykopaliska</span>. Archeolog używa szpachelki, pędzelka, sita, miarki i aparatu fotograficznego.</p>
+    <p class="tip">Słynne odkrycie w Polsce: <b>osada w Biskupinie</b>, zbudowana ponad 2700 lat temu. W 1933 r. nauczyciel Walenty Szwajcer zauważył drewniane pale wystające z jeziora i powiadomił naukowców.</p>
+  </div>
+  <div class="game"><div class="game-title">Ułóż pracę archeologa we właściwej kolejności</div><div id="g12"></div></div>
+</section>
+
+<!-- 13 -->
+<section class="topic" id="t13">
+  <div class="topic-head"><span class="num">13</span><h2>Co z przeszłości jest dla nas ważne?</h2><span class="star" data-star="13">★</span></div>
+  <div class="notes">
+    <span class="label">Ściąga</span>
+    <p>Znaczenie historyczne ma to, co wpłynęło na życie wielu ludzi albo pomaga nam zrozumieć przeszłość:</p>
+    <ul>
+      <li><b>wydarzenia</b>, np. chrzest Polski (966), odzyskanie niepodległości (1918),</li>
+      <li><b>ludzie</b>, np. królowie, Mikołaj Kopernik, Maria Skłodowska-Curie,</li>
+      <li><b>miejsca i budowle</b>, czyli <span class="hl">zabytki</span>, np. Zamek Królewski na Wawelu,</li>
+      <li><b>pamiątki rodzinne</b>, np. stare zdjęcia, listy, medale,</li>
+      <li><b>tradycje i zwyczaje</b>, np. święta, pieśni, potrawy.</li>
+    </ul>
+    <p>Wszystko, co otrzymaliśmy od przodków i chcemy przekazać dalej, to <span class="hl">dziedzictwo</span>. Dbamy o nie, bo bez niego nie wiedzielibyśmy, skąd pochodzimy.</p>
+  </div>
+  <div class="game"><div class="game-title">Szkolna wystawa „Historia mojej rodziny”: co na nią zabierzesz?</div><div id="g13"></div></div>
+</section>
+
+<!-- final -->
+<section class="topic" id="quiz">
+  <div class="topic-head"><span class="num" style="background:var(--sun);color:#1b2559">★</span><h2>Wielki Sprawdzian</h2></div>
+  <div class="notes"><p>15 losowych pytań ze wszystkich tematów. Na końcu dostaniesz ocenę i listę rzeczy do powtórki. Każda próba losuje inne pytania.</p></div>
+  <div class="game" id="final"></div>
+</section>
+
+<footer>Powodzenia na sprawdzianie! Klio trzyma kciuki (a raczej pióra).</footer>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+const $=(s,r=document)=>r.querySelector(s);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const KEY='klio-historia-4';
+const SHORT=['Historia','Po co?','Daty','Ery','Oś czasu','Kalendarz','Zegary','Wieki','Cyfry rzymskie','Mapa','Źródła','Archeolodzy','Dziedzictwo'];
+let done=new Set(), best=null;
+try{const s=JSON.parse(localStorage.getItem(KEY)||'{}');done=new Set(s.done||[]);best=s.best??null;}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify({done:[...done],best}));}catch(e){}};
+
+/* stops + progress */
+const stops=$('#stops');
+stops.innerHTML=SHORT.map((t,i)=>`<li><a href="#t${i+1}" data-stop="${i+1}"><span class="n">${i+1}</span><span class="t">${t}</span><span class="s">★</span></a></li>`).join('')
+ +`<li><a href="#quiz" class="final"><span class="n">★</span><span class="t">Wielki Sprawdzian</span><span class="s" id="best"></span></a></li>`;
+function paint(){
+  document.querySelectorAll('[data-star]').forEach(s=>s.classList.toggle('on',done.has(+s.dataset.star)));
+  document.querySelectorAll('[data-stop]').forEach(a=>a.classList.toggle('done',done.has(+a.dataset.stop)));
+  $('#count').textContent=`${done.size} / 13 ★`;
+  $('#meter').style.width=(done.size/13*100)+'%';
+  $('#best').textContent=best!=null?`${best}/15`:'';
+  $('#best').style.color='var(--blue)';$('#best').style.fontSize='.85rem';$('#best').style.fontWeight='800';
+}
+const CHEERS=['Super! Gwiazdka zdobyta','Brawo! Kolejna gwiazdka','Świetnie! Klio jest dumna','Mistrzowsko! Gwiazdka dla Ciebie'];
+function win(n){
+  if(!done.has(n)){done.add(n);save();paint();toast(CHEERS[n%CHEERS.length]+' ★');confetti(60);
+    if(done.size===13)setTimeout(()=>toast('Wszystkie 13 gwiazdek! Czas na Wielki Sprawdzian'),2600);}
+}
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2400);}
+function shakeEl(e){e.classList.remove('shake');void e.offsetWidth;e.classList.add('shake');}
+
+/* engine: multiple choice set */
+function mcq(root,qs,onWin){
+  let answered=0,good=0;
+  function render(){
+    answered=0;good=0;
+    root.innerHTML=qs.map((q,i)=>`<div class="q" data-i="${i}"><p class="q-t">${q.q}</p><div class="opts">${q.o.map((o,j)=>`<button class="opt" data-j="${j}">${o}</button>`).join('')}</div><p class="fb" hidden></p></div>`).join('')
+      +`<div class="foot"><span class="score"></span><button class="btn ghost again" hidden>Spróbuj jeszcze raz</button></div>`;
+  }
+  root.onclick=e=>{
+    if(e.target.closest('.again')){render();return;}
+    const b=e.target.closest('.opt');if(!b||b.disabled)return;
+    const qe=b.closest('.q'),q=qs[+qe.dataset.i],j=+b.dataset.j,ok=j===q.a;
+    qe.querySelectorAll('.opt').forEach((x,k)=>{x.disabled=true;if(k===q.a)x.classList.add('right');});
+    if(!ok)b.classList.add('wrong');
+    const fb=qe.querySelector('.fb');fb.hidden=false;
+    fb.innerHTML=(ok?'<b class="ok">Dobrze!</b> ':'<b class="no">Ups!</b> ')+(q.w||'');
+    answered++;if(ok)good++;
+    if(answered===qs.length){
+      root.querySelector('.score').textContent=`Wynik: ${good} / ${qs.length}`;
+      if(good===qs.length)onWin();else root.querySelector('.again').hidden=false;
+    }
+  };
+  render();
+}
+/* engine: pick all correct */
+function multi(root,items,onWin){
+  const order=shuffle(items.map((_,i)=>i));
+  root.innerHTML=`<div class="order-pool">${order.map(i=>`<button class="chip" data-i="${i}" aria-pressed="false">${items[i].t}</button>`).join('')}</div>
+   <div class="foot"><button class="btn check">Sprawdź</button><span class="fb msg"></span></div>`;
+  root.onclick=e=>{
+    const c=e.target.closest('.chip');
+    if(c){root.querySelectorAll('.chip').forEach(x=>x.classList.remove('right','wrong','missed'));
+      const on=!c.classList.contains('sel');c.classList.toggle('sel',on);c.setAttribute('aria-pressed',on);root.querySelector('.msg').textContent='';return;}
+    if(e.target.closest('.check')){
+      let bad=0,miss=0;
+      root.querySelectorAll('.chip').forEach(x=>{const it=items[+x.dataset.i],s=x.classList.contains('sel');
+        if(s&&it.ok)x.classList.add('right');else if(s&&!it.ok){x.classList.add('wrong');bad++;}else if(!s&&it.ok){x.classList.add('missed');miss++;}});
+      const m=root.querySelector('.msg');
+      if(!bad&&!miss){m.innerHTML='<b class="ok">Idealnie!</b> Wszystkie dobre odpowiedzi.';onWin();}
+      else m.innerHTML=`<b class="no">Prawie.</b> ${bad?`Czerwone nie pasują (${bad}). `:''}${miss?`Brakuje jeszcze ${miss}: popraw i sprawdź ponownie.`:'Odznacz je i sprawdź ponownie.'}`;
+    }
+  };
+}
+/* engine: sort into buckets */
+function sorter(root,items,buckets,onWin){
+  let left=items.length;
+  root.innerHTML=shuffle(items.map((_,i)=>i)).map(i=>`<div class="sort-row" data-i="${i}"><span class="it">${items[i].t}</span><span class="bks">${buckets.map((b,k)=>`<button class="bucket" data-k="${k}">${b}</button>`).join('')}</span><span class="note" hidden></span></div>`).join('')
+    +`<div class="foot"><span class="score">Zostało: ${left}</span></div>`;
+  root.onclick=e=>{
+    const b=e.target.closest('.bucket');if(!b||b.disabled)return;
+    const row=b.closest('.sort-row'),it=items[+row.dataset.i],note=row.querySelector('.note');note.hidden=false;
+    if(+b.dataset.k===it.b){row.classList.add('ok');row.querySelectorAll('.bucket').forEach(x=>x.disabled=true);b.classList.add('right');
+      note.innerHTML='<b class="ok">Tak!</b> '+it.n;left--;root.querySelector('.score').textContent=left?`Zostało: ${left}`:'Wszystko posortowane!';if(!left)onWin();}
+    else{shakeEl(row);note.innerHTML='<b class="no">Nie tym razem.</b> '+(it.h||'Pomyśl jeszcze raz.');}
+  };
+}
+/* engine: put in order */
+function orderer(root,items,onWin,label){
+  let next=0,miss=0;
+  function render(){
+    next=0;miss=0;
+    root.innerHTML=`<div class="order-pool">${shuffle(items.map((_,i)=>i)).map(i=>`<button class="chip" data-i="${i}">${items[i].t}${items[i].d?`<span class="dt">${items[i].d}</span>`:''}</button>`).join('')}</div>
+      <div class="foot"><span class="fb msg">${label||'Klikaj po kolei, zaczynając od pierwszego.'}</span><button class="btn ghost again">Od nowa</button></div>`;
+  }
+  root.onclick=e=>{
+    if(e.target.closest('.again')){render();return;}
+    const c=e.target.closest('.chip');if(!c||c.disabled)return;
+    const m=root.querySelector('.msg');
+    if(+c.dataset.i===next){c.disabled=true;c.classList.add('right');c.insertAdjacentHTML('afterbegin',`<span class="badge">${next+1}</span>`);next++;
+      if(next===items.length){m.innerHTML=miss?`<b class="ok">Gotowe!</b> Pomyłki: ${miss}. Ułóż bez pomyłki, żeby zdobyć gwiazdkę.`:'<b class="ok">Bezbłędnie!</b>';if(!miss)onWin();}
+      else m.innerHTML=`<b class="ok">Dobrze!</b> Co było następne?`;}
+    else{miss++;shakeEl(c);c.classList.add('wrong');setTimeout(()=>c.classList.remove('wrong'),500);m.innerHTML=`<b class="no">To jeszcze nie teraz.</b> ${items[next].h||''}`;}
+  };
+  render();
+}
+
+/* roman + century helpers */
+const RM=[[1000,'M'],[900,'CM'],[500,'D'],[400,'CD'],[100,'C'],[90,'XC'],[50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']];
+function toRoman(n){let s='';for(const[v,r]of RM)while(n>=v){s+=r;n-=v;}return s;}
+function fromRoman(s){s=s.toUpperCase().trim();if(!/^[IVXLCDM]+$/.test(s))return null;const V={I:1,V:5,X:10,L:50,C:100,D:500,M:1000};let t=0;
+  for(let i=0;i<s.length;i++){const a=V[s[i]],b=V[s[i+1]]||0;t+=a<b?-a:a;}return t>0&&t<4000&&toRoman(t)===s?t:null;}
+const century=y=>y%100===0?y/100:Math.floor(y/100)+1;
+const millennium=y=>y%1000===0?y/1000:Math.floor(y/1000)+1;
+function whyCentury(y){
+  if(y%100===0)return `Rok ${y} kończy się na „00”, więc skreślamy zera: ${y/100} → ${toRoman(y/100)} wiek.`;
+  const h=Math.floor(y/100);
+  return `Zakrywamy dwie ostatnie cyfry roku ${y}: zostaje ${h}. Dodajemy 1: ${h} + 1 = ${h+1} → ${toRoman(h+1)} wiek.`;
+}
+
+/* 1 */
+mcq($('#g1'),[
+ {q:'Historia to nauka o tym, co wydarzy się w przyszłości.',o:['Prawda','Fałsz'],a:1,w:'Historia bada przeszłość.'},
+ {q:'Historyk bada przeszłość, korzystając m.in. ze starych dokumentów.',o:['Prawda','Fałsz'],a:0,w:'Dokumenty to jedno ze źródeł historycznych.'},
+ {q:'Herodota nazywamy „ojcem historii”.',o:['Prawda','Fałsz'],a:0,w:'Herodot był greckim historykiem z V wieku p.n.e.'},
+ {q:'Historyk może wymyślać wydarzenia, żeby opowieść była ciekawsza.',o:['Prawda','Fałsz'],a:1,w:'Historyk opiera się na dowodach, czyli źródłach.'}
+],()=>win(1));
+
+/* 2 */
+multi($('#g2'),[
+ {t:'żeby lepiej rozumieć świat dzisiaj',ok:true},{t:'żeby poznać losy przodków',ok:true},
+ {t:'żeby uczyć się na błędach z przeszłości',ok:true},{t:'żeby znać tradycje i dziedzictwo',ok:true},
+ {t:'żeby przewidzieć numery w loterii',ok:false},{t:'żeby nauczyć się cofać w czasie',ok:false},{t:'bo przeszłość zmienia się codziennie',ok:false}
+],()=>win(2));
+
+/* 3 */
+mcq($('#g3'),[
+ {q:'11 listopada obchodzimy…',o:['Święto Niepodległości','Dzień Dziecka','Nowy Rok'],a:0,w:'11 listopada 1918 r. Polska odzyskała niepodległość.'},
+ {q:'Co oznacza skrót „ok.” przy dacie?',o:['około, nie znamy dokładnej daty','okropne wydarzenie','oficjalny kalendarz'],a:0,w:'„ok.” to „około”.'},
+ {q:'Ile lat minęło od chrztu Polski (966 r.) do 2026 r.?',o:['960','1060','1066'],a:1,w:'2026 − 966 = 1060. W 2026 r. przypada 1060. rocznica chrztu!'},
+ {q:'Ile lat minęło od bitwy pod Grunwaldem (1410 r.) do 2026 r.?',o:['606','616','516'],a:1,w:'2026 − 1410 = 616.'}
+],()=>win(3));
+
+/* 4 */
+mcq($('#g4'),[
+ {q:'Która data była wcześniej?',o:['500 r. p.n.e.','200 r. p.n.e.'],a:0,w:'W latach p.n.e. większa liczba oznacza dawniej.'},
+ {q:'Która data była wcześniej?',o:['100 r. n.e.','100 r. p.n.e.'],a:1,w:'Każdy rok p.n.e. był wcześniej niż każdy rok n.e.'},
+ {q:'Która data była wcześniej?',o:['1000 r. p.n.e.','3000 r. p.n.e.'],a:1,w:'3000 lat przed narodzinami Chrystusa to dawniej niż 1000 lat przed nimi.'},
+ {q:'Która data była wcześniej?',o:['1410 r.','966 r.'],a:1,w:'W naszej erze mniejsza liczba oznacza wcześniej.'},
+ {q:'Który rok nastąpił zaraz po 1 r. p.n.e.?',o:['0 r.','1 r. n.e.','2 r. p.n.e.'],a:1,w:'Roku zerowego nie było.'}
+],()=>win(4));
+
+/* 5 */
+orderer($('#g5'),[
+ {t:'Budowa piramidy Cheopsa',d:'ok. 2560 r. p.n.e.',h:'Szukaj największej liczby z dopiskiem p.n.e.'},
+ {t:'Pierwsze igrzyska olimpijskie',d:'776 r. p.n.e.',h:'Uwaga na lata p.n.e.: 776 było przed 753!'},
+ {t:'Założenie Rzymu',d:'753 r. p.n.e.',h:'Zostało jeszcze jedno wydarzenie p.n.e.'},
+ {t:'Koronacja Bolesława Chrobrego',d:'1025 r.',h:'Teraz lata n.e.: wybierz najmniejszą liczbę.'},
+ {t:'Uchwalenie Konstytucji 3 maja',d:'1791 r.',h:'Wybierz najmniejszą z pozostałych liczb.'},
+ {t:'Pierwszy człowiek na Księżycu',d:'1969 r.',h:'Zostało ostatnie wydarzenie.'}
+],()=>win(5),'Kliknij najpierw wydarzenie najdawniejsze.');
+
+/* 6 */
+mcq($('#g6'),[
+ {q:'Ile miesięcy ma rok?',o:['10','12','14'],a:1},
+ {q:'Ile dni ma luty w roku przestępnym?',o:['28','29','30'],a:1,w:'Dlatego rok przestępny ma 366 dni.'},
+ {q:'Który rok będzie przestępny?',o:['2027','2028','2030'],a:1,w:'Lata przestępne wypadają co 4 lata: 2024, 2028, 2032…'},
+ {q:'Kalendarz, którego dziś używamy, wprowadził…',o:['papież Grzegorz XIII','Juliusz Cezar','Mieszko I'],a:0,w:'Kalendarz gregoriański obowiązuje od 1582 r. Juliusz Cezar wprowadził wcześniejszy kalendarz juliański.'}
+],()=>win(6));
+
+/* 7 */
+const C4=['zegar słoneczny','klepsydra','zegar mechaniczny','zegar elektroniczny'];
+mcq($('#g7'),[
+ {q:'Nie działa w nocy ani w pochmurny dzień.',o:C4,a:0,w:'Potrzebuje słońca, żeby rzucić cień.'},
+ {q:'Odmierza krótki czas, np. gotowania jajka, i trzeba go odwracać.',o:C4,a:1,w:'W klepsydrze przesypuje się piasek.'},
+ {q:'Ma koła zębate i wahadło albo sprężynę. Dawniej wisiał na wieżach ratuszy.',o:C4,a:2},
+ {q:'Pokazuje godzinę cyframi i działa na baterię.',o:C4,a:3}
+],()=>win(7));
+
+/* 8 calculator */
+function calc(){
+  const y=parseInt($('#cy-year').value,10),pne=$('#cy-era').value==='pne',suf=pne?' p.n.e.':'';
+  if(!y||y<1||y>4000){$('#cy-out').textContent='Wpisz rok od 1 do 4000';$('#cy-why').textContent='';return;}
+  const c=century(y),m=millennium(y);
+  $('#cy-out').textContent=`${toRoman(c)} wiek${suf} · ${toRoman(m)} tysiąclecie${suf}`;
+  $('#cy-why').textContent=whyCentury(y);
+}
+$('#cy-year').addEventListener('input',calc);$('#cy-era').addEventListener('change',calc);calc();
+
+/* 8 trainer */
+const YEARS=[[966,0,'chrzest Polski'],[1410,0,'bitwa pod Grunwaldem'],[1025,0,'koronacja Bolesława Chrobrego'],[1791,0,'Konstytucja 3 maja'],[1918,0,'odzyskanie niepodległości'],
+ [1900,0,'początek… a może koniec wieku?'],[2026,0,'dzisiaj'],[1364,0,'założenie Akademii Krakowskiej'],[1683,0,'odsiecz wiedeńska'],[1000,0,'zjazd gnieźnieński'],
+ [1939,0,'wybuch II wojny światowej'],[1989,0,'pierwsze częściowo wolne wybory'],[753,1,'założenie Rzymu'],[776,1,'pierwsze igrzyska olimpijskie'],[2000,0,'rok 2000'],[1543,0,'dzieło Kopernika o obrotach ciał niebieskich']];
+(function(){
+  const root=$('#g8');let hits=0,pool=shuffle(YEARS),cur;
+  function round(){
+    if(!pool.length)pool=shuffle(YEARS);
+    cur=pool.pop();const[y,bc,ev]=cur,c=century(y);
+    const opts=shuffle(c===1?[1,2,3]:[c-1,c,c+1]);const suf=bc?' p.n.e.':'';
+    root.innerHTML=`<div class="q"><p class="q-t">${y} r.${suf} (${ev}) to który wiek?</p><div class="opts">${opts.map(o=>`<button class="opt" data-v="${o}">${toRoman(o)} w.${suf}</button>`).join('')}</div><p class="fb" hidden></p></div>
+      <div class="foot"><span class="score">Trafienia: ${hits} / 5</span><button class="btn next" hidden>Następny rok</button></div>`;
+  }
+  root.onclick=e=>{
+    if(e.target.closest('.next')){round();return;}
+    const b=e.target.closest('.opt');if(!b||b.disabled)return;
+    const c=century(cur[0]),ok=+b.dataset.v===c;
+    root.querySelectorAll('.opt').forEach(x=>{x.disabled=true;if(+x.dataset.v===c)x.classList.add('right');});
+    if(!ok)b.classList.add('wrong');else hits++;
+    const fb=root.querySelector('.fb');fb.hidden=false;fb.innerHTML=(ok?'<b class="ok">Trafione!</b> ':'<b class="no">Nie tym razem.</b> ')+whyCentury(cur[0]);
+    root.querySelector('.score').textContent=`Trafienia: ${Math.min(hits,5)} / 5`;
+    if(hits>=5&&ok&&!done.has(8))win(8);
+    root.querySelector('.next').hidden=false;
+  };
+  round();
+})();
+
+/* 9 roman tool */
+function rn1(){const n=parseInt($('#rn-num').value,10);$('#rn-out1').textContent=n>=1&&n<=3999?'= '+toRoman(n):'1–3999';}
+function rn2(){const v=$('#rn-rom').value;const n=fromRoman(v);$('#rn-out2').textContent=v.trim()?(n?'= '+n:'Ten zapis łamie zasady'):'';}
+$('#rn-num').addEventListener('input',rn1);$('#rn-rom').addEventListener('input',rn2);rn1();rn2();
+mcq($('#g9'),[
+ {q:'Ile to jest XXI?',o:['19','21','211'],a:1,w:'X + X + I = 10 + 10 + 1 = 21. To nasz wiek!'},
+ {q:'Jak zapisać 966?',o:['CMXLVI','DCCCCLXVI','CMLXVI'],a:2,w:'CM = 900, LX = 60, VI = 6.'},
+ {q:'Jaki rok kryje się w zapisie MCDX?',o:['1410','1610','1390'],a:0,w:'M = 1000, CD = 400, X = 10. Bitwa pod Grunwaldem!'},
+ {q:'Jak zapisać 1918?',o:['MCMXVIII','MDCCCCXVIII','MCMXIIX'],a:0,w:'M = 1000, CM = 900, X = 10, VIII = 8.'},
+ {q:'Który zapis liczby 4 jest poprawny?',o:['IIII','IV','IIV'],a:1,w:'Mniejsza cyfra przed większą: 5 − 1 = 4.'}
+],()=>win(9));
+
+/* 10 map */
+(function(){
+  const map=$('#map'),fb=$('#battle-fb');let battle=false,quiz=false;
+  const check=()=>{if(battle&&quiz)win(10);};
+  $('#legend').addEventListener('click',e=>{
+    if(e.target.closest('#ruler-btn')){const on=map.classList.toggle('ruler');e.target.closest('#ruler-btn').textContent=on?'Schowaj linijkę':'Pokaż linijkę';return;}
+    const b=e.target.closest('[data-k]');if(!b)return;
+    const k=b.dataset.k,on=map.dataset.focus!==k;
+    document.querySelectorAll('#legend [data-k]').forEach(x=>x.setAttribute('aria-pressed','false'));
+    if(on){map.dataset.focus=k;b.setAttribute('aria-pressed','true');}else delete map.dataset.focus;
+  });
+  map.addEventListener('click',e=>{
+    if(e.target.closest('#battle')){battle=true;fb.innerHTML='<b class="ok">Znalezione!</b> Skrzyżowane miecze to znak bitwy. Obok jest jej rok.';check();}
+    else if(!battle){fb.innerHTML='<b class="no">To nie bitwa.</b> Szukaj czerwonych skrzyżowanych mieczy.';}
+  });
+  mcq($('#g10'),[
+   {q:'Zadanie 2. Ile zamków jest na mapie?',o:['1','2','3'],a:1,w:'Zamek Pióro i Zamek Puchacz. Gród ma inny znak.'},
+   {q:'Zadanie 3. W którym roku odbyła się bitwa?',o:['1087','1187','1287'],a:1,w:'Rok bitwy podpisano obok jej znaku.'},
+   {q:'Zadanie 4. Ile kilometrów w linii prostej dzieli Zamek Pióro od Grodu Dziupla?',o:['20 km','40 km','100 km'],a:1,w:'Ta odległość mieści dwa odcinki skali po 20 km: 2 × 20 km = 40 km. Sprawdź „Pokaż linijkę”.'},
+   {q:'Zadanie 5. Co oznacza czerwona przerywana linia?',o:['granicę królestwa','szlak kupiecki','rzekę'],a:0,w:'Wszystko wyjaśnia legenda.'}
+  ],()=>{quiz=true;check();});
+})();
+
+/* 11 */
+const P=0,N=1;
+sorter($('#g11'),[
+ {t:'Kronika Galla Anonima',b:P,n:'Kronika to źródło pisane. To najstarsza kronika o dziejach Polski.',h:'Kronikę ktoś napisał.'},
+ {t:'List prababci z 1945 r.',b:P,n:'List to źródło pisane.'},
+ {t:'Akt urodzenia pradziadka',b:P,n:'Dokument to źródło pisane.'},
+ {t:'Miecz rycerza znaleziony w ziemi',b:N,n:'Niepisane, a dokładnie materialne (przedmiot).'},
+ {t:'Gliniany garnek z wykopalisk',b:N,n:'Niepisane, materialne.'},
+ {t:'Obraz „Bitwa pod Grunwaldem” Jana Matejki',b:N,n:'Niepisane, ikonograficzne (obraz).',h:'To obraz, a nie tekst.'},
+ {t:'Stare zdjęcie rodzinne',b:N,n:'Niepisane, ikonograficzne.'},
+ {t:'Opowieść dziadka o jego dzieciństwie',b:N,n:'Niepisane, ustne.',h:'Dziadek opowiada, a nie pisze.'},
+ {t:'Film z lądowania na Księżycu',b:N,n:'Niepisane, audiowizualne.'}
+],['pisane','niepisane'],()=>win(11));
+
+/* 12 */
+orderer($('#g12'),[
+ {t:'Wybiera miejsce poszukiwań',h:'Najpierw trzeba wiedzieć, gdzie kopać.'},
+ {t:'Zdejmuje ziemię warstwa po warstwie',h:'Zanim coś znajdzie, musi się dokopać.'},
+ {t:'Oczyszcza znalezisko pędzelkiem',h:'Znalezisko jest brudne od ziemi.'},
+ {t:'Mierzy, fotografuje i opisuje, gdzie leżało',h:'Zanim zabierze znalezisko, musi zapisać, gdzie leżało.'},
+ {t:'Bada znalezisko w pracowni i oddaje do muzeum',h:'To ostatni krok.'}
+],()=>win(12),'Kliknij pierwszy krok pracy archeologa.');
+
+/* 13 */
+multi($('#g13'),[
+ {t:'stare zdjęcie pradziadków',ok:true},{t:'list prababci z czasów wojny',ok:true},{t:'medal dziadka',ok:true},
+ {t:'drzewo genealogiczne rodziny',ok:true},{t:'wczorajszy paragon ze sklepu',ok:false},{t:'nowa gra na telefon',ok:false},{t:'pusty karton po pizzy',ok:false}
+],()=>win(13));
+
+/* final quiz */
+const POOL=[
+ {t:1,q:'Historia to nauka o…',o:['przeszłości','przyszłości','gwiazdach','roślinach']},
+ {t:1,q:'Kto bada przeszłość, czytając dawne dokumenty?',o:['historyk','astronom','geograf','biolog']},
+ {t:12,q:'Archeolog bada przede wszystkim…',o:['przedmioty i ślady ukryte w ziemi','gwiazdy i planety','pogodę','zwierzęta w lesie']},
+ {t:4,q:'Skrót p.n.e. oznacza…',o:['przed naszą erą','po naszej erze','pierwsza nasza era','przed nowym empirem']},
+ {t:4,q:'Od jakiego wydarzenia liczymy lata naszej ery?',o:['od narodzin Jezusa Chrystusa','od chrztu Polski','od założenia Rzymu','od budowy piramid']},
+ {t:4,q:'Która data jest najwcześniejsza?',o:['753 r. p.n.e.','300 r. p.n.e.','1 r. p.n.e.','966 r.']},
+ {t:8,q:'Rok 966 to który wiek?',o:['X','IX','XI','XCVI']},
+ {t:8,q:'Rok 1410 to który wiek?',o:['XV','XIV','XVI','XLI']},
+ {t:8,q:'Rok 1900 to który wiek?',o:['XIX','XX','XVIII','XXI']},
+ {t:8,q:'Rok 2026 to który wiek?',o:['XXI','XX','XXII','XXVI']},
+ {t:8,q:'W którym tysiącleciu żyjemy?',o:['III','II','I','XXI']},
+ {t:8,q:'Rok 753 p.n.e. to który wiek?',o:['VIII w. p.n.e.','VII w. p.n.e.','IX w. p.n.e.','VIII w. n.e.']},
+ {t:9,q:'2026 zapisane cyframi rzymskimi to…',o:['MMXXVI','MMXXIV','MMXVI','MCMXXVI']},
+ {t:9,q:'Ile to jest XIV?',o:['14','16','9','140']},
+ {t:9,q:'Jaką liczbę oznacza CM?',o:['900','1100','600','150']},
+ {t:9,q:'Który zapis liczby 4 jest poprawny?',o:['IV','IIII','VI','IIV']},
+ {t:6,q:'Ile dni ma rok przestępny?',o:['366','365','360','364']},
+ {t:6,q:'Kalendarz, którego dziś używamy, to kalendarz…',o:['gregoriański','juliański','księżycowy','rzymski']},
+ {t:7,q:'Który zegar nie działa w nocy?',o:['słoneczny','klepsydra','mechaniczny','elektroniczny']},
+ {t:7,q:'Klepsydra odmierza czas za pomocą…',o:['przesypującego się piasku','cienia','baterii','wahadła']},
+ {t:10,q:'Co wyjaśnia znaczenie znaków na mapie?',o:['legenda','skala','róża wiatrów','tytuł']},
+ {t:10,q:'Skala mapy mówi nam…',o:['ile razy zmniejszono teren','jakie kolory ma mapa','kto narysował mapę','kiedy była bitwa']},
+ {t:10,q:'Czym mapa historyczna różni się od geograficznej?',o:['pokazuje świat w przeszłości, np. dawne granice i bitwy','zawsze ma więcej kolorów','nie ma legendy','jest zawsze rysowana ręcznie']},
+ {t:11,q:'Kronika to źródło…',o:['pisane','materialne','ikonograficzne','ustne']},
+ {t:11,q:'Miecz rycerza znaleziony w ziemi to źródło…',o:['materialne','pisane','ustne','audiowizualne']},
+ {t:11,q:'Obraz przedstawiający bitwę to źródło…',o:['ikonograficzne','pisane','ustne','audiowizualne']},
+ {t:11,q:'Opowieść babci o dawnych czasach to źródło…',o:['ustne','pisane','materialne','ikonograficzne']},
+ {t:5,q:'Oś czasu pomaga…',o:['ułożyć wydarzenia w kolejności','zmierzyć temperaturę','wyznaczyć kierunki świata','policzyć pieniądze']},
+ {t:12,q:'Słynna osada odkryta przez archeologów w Polsce to…',o:['Biskupin','Giewont','Hel','Bałtyk']},
+ {t:13,q:'Zabytek to…',o:['obiekt z przeszłości chroniony ze względu na jego wartość','każda nowa rzecz','sklep z pamiątkami','tylko stary samochód']},
+ {t:2,q:'Po co uczymy się historii?',o:['by rozumieć świat dziś i znać losy przodków','by przewidzieć numery w loterii','bo przeszłość ciągle się zmienia','by nie chodzić do szkoły']},
+ {t:3,q:'Ile lat minęło od 1918 r. do 2026 r.?',o:['108','118','98','1108']}
+];
+const GRADES=[[15,'6','celujący','Klio aż zahukała z zachwytu!'],[13,'5','bardzo dobry','Świetna robota!'],[11,'4','dobry','Dobrze! Jeszcze mała powtórka i będzie piątka.'],
+ [8,'3','dostateczny','Nieźle, ale warto powtórzyć tematy z listy.'],[5,'2','dopuszczający','Powtórz tematy z listy i spróbuj jeszcze raz.'],[0,'1','niedostateczny','Nie szkodzi! Przejdź przystanki jeszcze raz i wróć tutaj.']];
+(function(){
+  const root=$('#final');let qs,i,score,wrong;
+  function start(){
+    qs=shuffle(POOL).slice(0,15).map(q=>({...q,opts:shuffle(q.o)}));i=0;score=0;wrong=[];show();
+  }
+  function show(){
+    const q=qs[i];
+    root.innerHTML=`<div class="quiz-card"><div class="quiz-top"><span>Pytanie ${i+1} z 15</span><span>Punkty: ${score}</span></div>
+      <div class="meter"><span style="width:${i/15*100}%"></span></div>
+      <p class="quiz-q">${q.q}</p><div class="opts">${q.opts.map(o=>`<button class="opt">${o}</button>`).join('')}</div>
+      <p class="fb" hidden></p><div class="foot"><button class="btn nx" hidden>${i<14?'Dalej':'Zobacz wynik'}</button></div></div>`;
+  }
+  function end(){
+    if(best==null||score>best){best=score;save();paint();}
+    const g=GRADES.find(g=>score>=g[0]);
+    const topics=[...new Set(wrong.map(w=>w.t))].sort((a,b)=>a-b);
+    root.innerHTML=`<div class="quiz-card"><p class="small">Twój wynik</p><div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap">
+      <span class="grade">${score} / 15</span><span><span class="quiz-q">Ocena: ${g[1]} (${g[2]})</span><br><span class="hand">${g[3]}</span></span></div>
+      ${topics.length?`<p><b>Do powtórki:</b></p><ul class="review">${topics.map(t=>`<li><a href="#t${t}">${t}. ${SHORT[t-1]}</a></li>`).join('')}</ul>
+      <p><b>Pytania z błędem:</b></p><ul class="review">${wrong.map(w=>`<li>${w.q} <b>${w.o[0]}</b></li>`).join('')}</ul>`:'<p>Bez ani jednego błędu. Jesteś gotowy na sprawdzian!</p>'}
+      <div class="foot"><button class="btn re">Nowe losowanie pytań</button></div></div>`;
+    if(score>=13)confetti(160);
+  }
+  root.onclick=e=>{
+    if(e.target.closest('.re')){start();root.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});return;}
+    if(e.target.closest('.nx')){i++;i<15?show():end();return;}
+    const b=e.target.closest('.opt');if(!b||b.disabled)return;
+    const q=qs[i],ok=b.textContent===q.o[0];
+    root.querySelectorAll('.opt').forEach(x=>{x.disabled=true;if(x.textContent===q.o[0])x.classList.add('right');});
+    if(ok)score++;else{b.classList.add('wrong');wrong.push(q);}
+    const fb=root.querySelector('.fb');fb.hidden=false;
+    fb.innerHTML=ok?'<b class="ok">Dobrze!</b>':`<b class="no">Niestety.</b> Poprawna odpowiedź: <b>${q.o[0]}</b>`;
+    root.querySelector('.quiz-top span:last-child').textContent=`Punkty: ${score}`;
+    root.querySelector('.nx').hidden=false;root.querySelector('.nx').focus();
+  };
+  start();
+})();
+
+/* confetti */
+function confetti(n){
+  if(reduce)return;const cv=$('#confetti');cv.hidden=false;const ctx=cv.getContext('2d');
+  const W=cv.width=innerWidth,H=cv.height=innerHeight;const cols=['#f5a524','#2346c4','#1a8f4c','#d23a2e','#8ea6ff'];
+  const ps=Array.from({length:n},()=>({x:W/2+(Math.random()-.5)*W*.4,y:H*.35,vx:(Math.random()-.5)*10,vy:-Math.random()*10-4,r:Math.random()*6+4,c:cols[Math.random()*5|0],a:Math.random()*6}));
+  let f=0;(function tick(){ctx.clearRect(0,0,W,H);ps.forEach(p=>{p.vy+=.35;p.x+=p.vx;p.y+=p.vy;p.a+=.2;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.a);ctx.fillStyle=p.c;ctx.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);ctx.restore();});
+    if(++f<110)requestAnimationFrame(tick);else{ctx.clearRect(0,0,W,H);cv.hidden=true;}})();
+}
+paint();
+})();
+</script>
+
+</body></html>
