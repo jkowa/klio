@@ -1,0 +1,875 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Wyprawa Przyrodnika z Klio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@400;600;800&family=Caveat:wght@600&display=swap">
+<style>
+/* Layout: zielnik przyrodnika w kratkę: jedna kolumna przystanków, każdy ze ściągą i mini-grą; przyklejony pasek gwiazdek u góry */
+:root{
+  --paper:#f4f7ef; --grid:rgba(31,111,92,.08); --card:#ffffff; --soft:#ecf2e3; --line:#d2dec4;
+  --ink:#1f2d1c; --ink-soft:#56654f; --leaf:#1f6f5c; --leaf-ink:#ffffff;
+  --hl:rgba(255,200,60,.55); --sun:#f2a516; --red:#cc3b2b; --red-bg:#fce8e4; --ok:#2e8f45; --ok-bg:#e2f5e6;
+  --owl:#8a5a2f; --owl-belly:#f1dcb8; --metal:#46544c; --metal-2:#6c7c72; --lens:#9cc7ef;
+  --land:#e6f0d4; --water:#9cc7ef; --forest:#3f8a3a; --mount:#8d9a86; --roof:#c9704a;
+  --f-display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --f-body:"Nunito","Segoe UI",system-ui,sans-serif;
+  --f-hand:"Caveat","Comic Sans MS",cursive;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#111a14; --grid:rgba(160,220,170,.06); --card:#19251c; --soft:#203024; --line:#30453a;
+  --ink:#e8f1e4; --ink-soft:#a9bba5; --leaf:#7fd1b4; --leaf-ink:#111a14;
+  --hl:rgba(255,200,60,.28); --red:#ff8a7e; --red-bg:#45211d; --ok:#6ad98f; --ok-bg:#183a24;
+  --owl:#b07a48; --owl-belly:#5b4632; --metal:#9aaba1; --metal-2:#71837a; --lens:#5d8fbf;
+  --land:#1f3324; --water:#2d5d82; --forest:#6dbb5c; --mount:#5d6b58; --roof:#d98a63; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#111a14; --grid:rgba(160,220,170,.06); --card:#19251c; --soft:#203024; --line:#30453a;
+  --ink:#e8f1e4; --ink-soft:#a9bba5; --leaf:#7fd1b4; --leaf-ink:#111a14;
+  --hl:rgba(255,200,60,.28); --red:#ff8a7e; --red-bg:#45211d; --ok:#6ad98f; --ok-bg:#183a24;
+  --owl:#b07a48; --owl-belly:#5b4632; --metal:#9aaba1; --metal-2:#71837a; --lens:#5d8fbf;
+  --land:#1f3324; --water:#2d5d82; --forest:#6dbb5c; --mount:#5d6b58; --roof:#d98a63; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background-color:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.6;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:22px 22px;}
+.wrap{max-width:860px;margin:0 auto;padding-inline:16px;padding-block:0 64px}
+h1,h2,h3{font-family:var(--f-display);line-height:1.15;text-wrap:balance;margin:0}
+p{margin:0}
+b{font-weight:800}
+.hl{background:linear-gradient(transparent 52%,var(--hl) 52%);font-weight:800;padding-inline:2px}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--leaf);outline-offset:2px;border-radius:8px}
+
+.hero{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;padding-block:32px 20px}
+.owl{width:120px;height:120px}
+.owl .lid{transform-origin:center;animation:blink 5s infinite}
+@keyframes blink{0%,94%,100%{transform:scaleY(0)}96%{transform:scaleY(1)}}
+.hero h1{font-size:clamp(2.1rem,6vw,3.2rem);font-weight:800;color:var(--leaf)}
+.hero .lead{max-width:56ch;margin-top:6px;color:var(--ink-soft)}
+.hand{font-family:var(--f-hand);font-size:1.35rem;color:var(--leaf);line-height:1.2}
+.hero .hand{margin-top:6px;transform:rotate(-1.5deg);display:inline-block}
+.hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.btn{display:inline-flex;align-items:center;gap:8px;border:2px solid var(--leaf);background:var(--leaf);color:var(--leaf-ink);
+  padding:10px 18px;border-radius:999px;font-weight:800;text-decoration:none;font-size:1rem}
+.btn.ghost{background:transparent;color:var(--leaf)}
+.btn:hover{filter:brightness(1.08)}
+@media (max-width:520px){.hero{grid-template-columns:1fr}.owl{width:92px;height:92px}}
+
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--paper);border-bottom:2px solid var(--line);
+  margin-inline:-16px;padding:10px 16px;display:flex;align-items:center;gap:14px}
+.bar-label{font-family:var(--f-display);font-weight:800;white-space:nowrap}
+.meter{flex:1;height:12px;border-radius:999px;background:var(--soft);border:2px solid var(--line);overflow:hidden;min-width:60px}
+.meter span{display:block;height:100%;width:0;background:var(--sun);transition:width .5s}
+.bar-count{font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+.stops{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-block:22px 8px;padding:0;list-style:none}
+.stops a{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:12px;border:2px solid var(--line);
+  background:var(--card);color:var(--ink);text-decoration:none;min-height:74px;position:relative}
+.stops a:hover{border-color:var(--leaf)}
+.stops .n{font-family:var(--f-display);font-weight:800;color:var(--leaf);font-size:1.1rem;line-height:1}
+.stops .t{font-size:.92rem;font-weight:700;line-height:1.25}
+.stops .s{position:absolute;top:6px;right:9px;color:var(--line);font-size:1.1rem}
+.stops a.done .s{color:var(--sun)}
+.stops a.final{border-style:dashed;border-color:var(--leaf)}
+
+.topic{background:var(--card);border:2px solid var(--line);border-radius:16px;margin-top:26px;padding:22px 22px 24px;scroll-margin-top:70px}
+@media (max-width:520px){.topic{padding:18px 14px 20px}}
+.topic-head{display:flex;gap:14px;align-items:flex-start}
+.num{flex:none;width:44px;height:44px;border-radius:50%;background:var(--leaf);color:var(--leaf-ink);display:grid;place-items:center;
+  font-family:var(--f-display);font-weight:800;font-size:1.3rem}
+.topic-head h2{font-size:1.5rem;flex:1;padding-top:6px}
+.star{flex:none;font-size:1.8rem;line-height:1;color:var(--line);padding-top:6px;transition:transform .3s}
+.star.on{color:var(--sun);transform:scale(1.15) rotate(-8deg)}
+.notes{margin-top:14px;display:grid;gap:10px;max-width:68ch}
+.notes .label{font-family:var(--f-hand);font-size:1.4rem;color:var(--leaf);line-height:1}
+.notes ul,.notes ol{margin:0;padding-left:1.3em;display:grid;gap:4px}
+.tip{border-left:4px solid var(--sun);padding:6px 12px;background:var(--soft);border-radius:0 10px 10px 0}
+.rule{display:grid;gap:6px;background:var(--soft);border-radius:12px;padding:12px 14px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:600px){.two{grid-template-columns:1fr}}
+.two>div{min-width:0}
+
+.game{margin-top:18px;border-top:2px dashed var(--line);padding-top:16px;display:grid;gap:14px}
+.game-title{font-family:var(--f-display);font-weight:800;font-size:1.1rem;display:flex;align-items:center;gap:8px}
+.game-title::before{content:"";width:12px;height:12px;border-radius:3px;background:var(--sun);transform:rotate(45deg);flex:none}
+.q{display:grid;gap:8px}
+.q-t{font-weight:800}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt,.chip,.bucket{border:2px solid var(--line);background:var(--card);border-radius:12px;padding:8px 14px;font-weight:700;text-align:left;line-height:1.35}
+.opt:hover:not([disabled]),.chip:hover:not([disabled]),.bucket:hover:not([disabled]){border-color:var(--leaf)}
+.opt[disabled]{cursor:default}
+.right{border-color:var(--ok)!important;background:var(--ok-bg)!important;color:var(--ink)}
+.wrong{border-color:var(--red)!important;background:var(--red-bg)!important}
+.chip.sel{border-color:var(--leaf);background:var(--soft);box-shadow:inset 0 0 0 1px var(--leaf)}
+.chip.missed{border-style:dashed;border-color:var(--ok)}
+.fb{font-size:.95rem;color:var(--ink-soft)}
+.fb b.ok{color:var(--ok)} .fb b.no{color:var(--red)}
+.foot{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.score{font-weight:800}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.sort-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 10px;border:2px solid var(--line);border-radius:12px}
+.sort-row .it{flex:1 1 200px;font-weight:700;min-width:0}
+.sort-row .bks{display:flex;gap:6px;flex-wrap:wrap}
+.sort-row .bucket{padding:6px 12px;font-size:.92rem}
+.sort-row .note{flex-basis:100%;font-size:.92rem;color:var(--ink-soft)}
+.sort-row.ok{border-color:var(--ok);background:var(--ok-bg)}
+.order-pool{display:flex;flex-wrap:wrap;gap:8px}
+.chip .badge{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--ok);color:var(--card);font-size:.85rem;margin-right:6px}
+.chip .dt{display:block;font-size:.85rem;color:var(--ink-soft);font-weight:600}
+
+.tool{display:grid;gap:12px;background:var(--soft);border-radius:14px;padding:14px}
+.tool-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.tool select{font:inherit;font-weight:800;padding:8px 12px;border-radius:10px;border:2px solid var(--line);background:var(--card);color:var(--ink)}
+.big-out{font-family:var(--f-display);font-size:1.6rem;font-weight:800;color:var(--leaf);line-height:1.2;font-variant-numeric:tabular-nums}
+.small{font-size:.92rem;color:var(--ink-soft)}
+.slider{display:grid;grid-template-columns:minmax(0,9.5em) 1fr 3.6em;gap:10px;align-items:center}
+.slider label{font-weight:700}
+.slider output{font-weight:800;font-variant-numeric:tabular-nums;text-align:right}
+input[type=range]{width:100%;accent-color:var(--leaf)}
+.st-bar{position:relative;height:22px;border-radius:999px;background:var(--card);border:2px solid var(--line);overflow:hidden}
+.st-bar span{display:block;height:100%;width:0;transition:width .3s,background .3s}
+.st-bar i{position:absolute;top:-2px;bottom:-2px;width:3px;background:var(--ink)}
+.st-scale{display:flex;justify-content:space-between;font-size:.8rem;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+
+/* microscope */
+.scope{display:grid;grid-template-columns:minmax(0,260px) 1fr;gap:16px;align-items:start}
+@media (max-width:600px){.scope{grid-template-columns:1fr}}
+.scope svg{width:100%;max-width:260px;height:auto;display:block;margin-inline:auto}
+.mp{cursor:pointer}
+.mp > *{fill:var(--metal);stroke:var(--ink);stroke-width:1.5;transition:fill .2s,opacity .2s}
+.mp .glass{fill:var(--lens)}
+.mp .hit{fill:transparent;stroke:none}
+.mp.hi > *:not(.hit){fill:var(--sun)}
+.mp.bad > *:not(.hit){fill:var(--red)}
+.scope svg.focus .mp:not(.hi):not(.bad){opacity:.35}
+.parts{display:flex;flex-wrap:wrap;gap:6px;align-content:start}
+.parts button{border:2px solid var(--line);background:var(--card);border-radius:999px;padding:4px 12px;font-weight:700;font-size:.92rem}
+.parts button[aria-pressed="true"]{border-color:var(--sun);background:var(--soft)}
+.part-info{min-height:4.8em;background:var(--soft);border-radius:12px;padding:10px 12px}
+.part-info b{color:var(--leaf);font-family:var(--f-display);font-size:1.15rem}
+.field{width:190px;height:190px;max-width:100%;display:block}
+.field circle.rim{fill:none;stroke:var(--ink);stroke-width:6}
+
+/* compass */
+.cmp-wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:center}
+@media (max-width:640px){.cmp-wrap{grid-template-columns:1fr}}
+.cmp{width:100%;max-width:400px;height:auto;display:block;margin-inline:auto;border:2px solid var(--line);border-radius:14px;background:var(--land)}
+.cmp text{font-family:var(--f-body);font-weight:800;fill:var(--ink);font-size:14px}
+.cmp .dial-l{font-family:var(--f-display);font-size:20px}
+.cmp .needle{transform-origin:200px 200px}
+.cmp .needle.wob{animation:wob .7s}
+@keyframes wob{25%{transform:rotate(6deg)}50%{transform:rotate(-4deg)}75%{transform:rotate(2deg)}}
+.cmp-status{font-weight:800}
+.cmp-status.ok{color:var(--ok)}
+
+.quiz-card{display:grid;gap:12px;background:var(--soft);border-radius:14px;padding:18px}
+.quiz-top{display:flex;justify-content:space-between;gap:10px;font-weight:800;font-variant-numeric:tabular-nums;flex-wrap:wrap}
+.quiz-q{font-family:var(--f-display);font-size:1.35rem;font-weight:800;line-height:1.25}
+.quiz-card .opts{display:grid;gap:8px}
+.grade{font-family:var(--f-display);font-size:3rem;font-weight:800;color:var(--leaf);line-height:1}
+.review{display:grid;gap:6px;padding-left:1.2em;margin:0}
+.review a{color:var(--leaf);font-weight:800}
+
+.toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translate(-50%,160%);background:var(--ink);color:var(--paper);
+  padding:10px 18px;border-radius:999px;font-weight:800;z-index:50;transition:transform .35s;max-width:calc(100% - 32px);text-align:center}
+.toast.show{transform:translate(-50%,0)}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:40;width:100%;height:100%}
+footer{margin-top:30px;text-align:center;color:var(--ink-soft);font-size:.9rem}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<canvas id="confetti" hidden></canvas>
+<div class="wrap">
+
+<header class="hero">
+  <svg class="owl" viewBox="0 0 120 120" aria-hidden="true">
+    <polygon points="24,40 30,12 48,32" fill="var(--owl)"/><polygon points="96,40 90,12 72,32" fill="var(--owl)"/>
+    <path d="M60 22c10-14 26-14 32-10-8 2-18 8-32 10z" fill="var(--forest)"/><path d="M60 22c10-6 20-8 30-9" stroke="var(--paper)" stroke-width="1.2" fill="none"/>
+    <ellipse cx="60" cy="70" rx="40" ry="44" fill="var(--owl)"/>
+    <ellipse cx="60" cy="84" rx="25" ry="27" fill="var(--owl-belly)"/>
+    <path d="M44 84q4 4 8 0M56 92q4 4 8 0M68 84q4 4 8 0" stroke="var(--owl)" stroke-width="2" fill="none"/>
+    <circle cx="43" cy="56" r="15" fill="#fff"/><circle cx="77" cy="56" r="15" fill="#fff"/>
+    <circle cx="45" cy="58" r="7" fill="#1f2d1c"/><circle cx="79" cy="58" r="7" fill="#1f2d1c"/>
+    <circle cx="47" cy="55" r="2" fill="#fff"/><circle cx="81" cy="55" r="2" fill="#fff"/>
+    <g class="lid"><circle cx="43" cy="56" r="15.5" fill="var(--owl)"/><circle cx="77" cy="56" r="15.5" fill="var(--owl)"/></g>
+    <circle cx="43" cy="56" r="16" fill="none" stroke="var(--sun)" stroke-width="3"/><circle cx="77" cy="56" r="16" fill="none" stroke="var(--sun)" stroke-width="3"/>
+    <path d="M59 56h2" stroke="var(--sun)" stroke-width="3"/>
+    <polygon points="54,68 66,68 60,79" fill="var(--sun)"/>
+    <path d="M46 112l-4 5M52 112v6M68 112v6M74 112l4 5" stroke="var(--sun)" stroke-width="3" stroke-linecap="round"/>
+  </svg>
+  <div>
+    <h1>Wyprawa Przyrodnika z Klio</h1>
+    <p class="lead">Powtórka przed sprawdzianem z przyrody dla 4 klasy. Przejdź 7 przystanków: przeczytaj ściągę, zagraj w mini-grę i zdobądź gwiazdkę. Na końcu czeka Wielki Sprawdzian z oceną.</p>
+    <span class="hand">To znowu ja, sowa Klio! Sowy to świetni obserwatorzy: widzą w nocy i słyszą szelest myszy w trawie.</span>
+    <div class="hero-actions">
+      <a class="btn" href="#t1">Ruszamy na wyprawę</a>
+      <a class="btn ghost" href="#quiz">Od razu na sprawdzian</a>
+    </div>
+  </div>
+</header>
+
+<div class="bar">
+  <span class="bar-label">Twoje gwiazdki</span>
+  <div class="meter" aria-hidden="true"><span id="meter"></span></div>
+  <span class="bar-count" id="count">0 / 7 ★</span>
+</div>
+
+<ul class="stops" id="stops"></ul>
+
+<!-- 1 -->
+<section class="topic" id="t1">
+  <div class="topic-head"><span class="num">1</span><h2>Co to jest przyroda?</h2><span class="star" data-star="1">★</span></div>
+  <div class="notes">
+    <span class="label">Ściąga</span>
+    <p><span class="hl">Przyroda</span> to wszystko, co nas otacza i <b>nie zostało zrobione przez człowieka</b>. Dzielimy ją na dwie części:</p>
+    <div class="two">
+      <div class="rule"><b>Przyroda ożywiona</b><span>Organizmy, czyli istoty żywe: rośliny, zwierzęta, grzyby, bakterie i ludzie.</span></div>
+      <div class="rule"><b>Przyroda nieożywiona</b><span>Woda, powietrze, skały, gleba, Słońce, światło i ciepło.</span></div>
+    </div>
+    <p>Rzeczy zrobione przez ludzi (dom, rower, ławka, butelka) to <span class="hl">wytwory człowieka</span>. Nie są częścią przyrody.</p>
+    <p><b>Po czym poznać organizm żywy?</b> Każdy organizm:</p>
+    <ul>
+      <li>oddycha, odżywia się i wydala zbędne substancje,</li>
+      <li>rośnie i rozwija się,</li>
+      <li>rozmnaża się,</li>
+      <li>reaguje na to, co dzieje się wokół (np. roślina zwraca się do światła),</li>
+      <li>porusza się (rośliny też, tylko bardzo powoli).</li>
+    </ul>
+    <p class="tip">Przyroda to także nazwa przedmiotu szkolnego. W starszych klasach podzieli się na <b>biologię</b>, <b>geografię</b>, <b>chemię</b> i <b>fizykę</b>.</p>
+  </div>
+  <div class="game"><div class="game-title">Część 1: Posortuj</div><div id="g1a"></div></div>
+  <div class="game"><div class="game-title">Część 2: Zaznacz cechy organizmów żywych</div><div id="g1b"></div></div>
+</section>
+
+<!-- 2 -->
+<section class="topic" id="t2">
+  <div class="topic-head"><span class="num">2</span><h2>Sposób na naukę</h2><span class="star" data-star="2">★</span></div>
+  <div class="notes">
+    <span class="label">Ściąga</span>
+    <p><b>Dobre miejsce do nauki</b> jest ciche, jasne i przewietrzone. Na biurku leży tylko to, czego potrzebujesz. Telefon i telewizor są wyłączone.</p>
+    <p><b>Jak się uczyć?</b></p>
+    <ul>
+      <li>Ucz się regularnie, małymi porcjami, a nie wszystkiego w ostatni wieczór.</li>
+      <li>Rób krótkie przerwy (np. 5–10 minut co pół godziny) i wtedy się poruszaj.</li>
+      <li>Powtarzaj: najlepiej tego samego dnia, następnego dnia i przed sprawdzianem.</li>
+      <li>Rób notatki, rysunki i <span class="hl">mapy myśli</span> (temat w środku kartki, a od niego gałęzie z hasłami).</li>
+      <li>Wytłumacz materiał komuś innemu. Jeśli umiesz to zrobić, to znaczy, że rozumiesz.</li>
+      <li>Wysypiaj się (dzieci potrzebują 9–12 godzin snu), pij wodę i jedz zdrowo.</li>
+    </ul>
+    <p><b>Różne sposoby zapamiętywania:</b></p>
+    <ul>
+      <li><b>wzrokowiec</b> najlepiej zapamiętuje to, co zobaczy: rysunki, schematy, kolorowe notatki,</li>
+      <li><b>słuchowiec</b> zapamiętuje to, co usłyszy: czytanie na głos, rozmowy, nagrania,</li>
+      <li><b>czuciowiec</b> (kinestetyk) uczy się przez działanie i ruch: modele, doświadczenia, fiszki.</li>
+    </ul>
+    <p class="tip">Najlepiej łączyć wszystkie sposoby: zobaczyć, usłyszeć i zrobić coś samemu.</p>
+  </div>
+  <div class="game"><div class="game-title">Część 1: Co pomaga w nauce?</div><div id="g2a"></div></div>
+  <div class="game"><div class="game-title">Część 2: Kto tak lubi się uczyć?</div><div id="g2b"></div></div>
+</section>
+
+<!-- 3 -->
+<section class="topic" id="t3">
+  <div class="topic-head"><span class="num">3</span><h2>Ile czasu spędzam przed ekranem?</h2><span class="star" data-star="3">★</span></div>
+  <div class="notes">
+    <span class="label">Ściąga</span>
+    <p>Ekrany są wszędzie: w telefonie, tablecie, telewizorze, komputerze i konsoli. Lekarze radzą, żeby dzieci w Twoim wieku spędzały przed ekranem dla rozrywki <b>nie więcej niż ok. 2 godziny dziennie</b>.</p>
+    <p><b>Co się dzieje, gdy siedzimy przed ekranem za długo?</b></p>
+    <ul>
+      <li>oczy się męczą, pieką i mogą pojawić się wady wzroku,</li>
+      <li>bolą głowa i plecy, powstają <b>wady postawy</b> (garbienie się),</li>
+      <li>trudniej zasnąć i gorzej się śpi,</li>
+      <li>ruszamy się za mało, co prowadzi do nadwagi,</li>
+      <li>trudniej się skupić, mniej czasu zostaje na przyjaciół i zabawę,</li>
+      <li>można się od ekranu <b>uzależnić</b>.</li>
+    </ul>
+    <p><b>Zdrowe zasady:</b></p>
+    <ul>
+      <li><span class="hl">Zasada 20-20-20</span>: co 20 minut patrz przez 20 sekund na coś odległego o ok. 6 metrów. Te 6 metrów to <b>20 stóp</b> (stopa to dawna miara długości, ok. 30 cm), stąd trzecia „dwudziestka” w nazwie.</li>
+      <li>Siedź prosto, a ekran trzymaj w odległości wyciągniętej ręki.</li>
+      <li>Odłóż ekran ok. <b>godzinę przed snem</b> i nie zabieraj telefonu do łóżka.</li>
+      <li>Ruszaj się co najmniej <b>60 minut dziennie</b>, najlepiej na świeżym powietrzu.</li>
+    </ul>
+  </div>
+  <div class="tool" style="margin-top:14px">
+    <b>Licznik ekranowy: ile godzin dziennie spędzasz dla rozrywki przed…</b>
+    <div class="slider"><label for="st-phone">telefonem lub tabletem</label><input id="st-phone" type="range" min="0" max="6" step="0.5" value="1.5"><output id="o-phone"></output></div>
+    <div class="slider"><label for="st-tv">telewizorem</label><input id="st-tv" type="range" min="0" max="6" step="0.5" value="1"><output id="o-tv"></output></div>
+    <div class="slider"><label for="st-game">grami (komputer, konsola)</label><input id="st-game" type="range" min="0" max="6" step="0.5" value="1"><output id="o-game"></output></div>
+    <div class="st-bar" aria-hidden="true"><span id="st-fill"></span><i style="left:calc(2/8*100%)"></i></div>
+    <div class="st-scale" aria-hidden="true"><span>0 h</span><span style="margin-left:calc(25% - 40px)">limit: 2 h</span><span style="margin-left:auto">8 h</span></div>
+    <div class="big-out" id="st-out"></div>
+    <div id="st-year"></div>
+    <div class="small" id="st-msg"></div>
+  </div>
+  <div class="game"><div class="game-title">Prawda czy fałsz?</div><div id="g3"></div></div>
+</section>
+
+<!-- 4 -->
+<section class="topic" id="t4">
+  <div class="topic-head"><span class="num">4</span><h2>Badam przyrodę</h2><span class="star" data-star="4">★</span></div>
+  <div class="notes">
+    <span class="label">Ściąga</span>
+    <p>Przyrodę poznajemy <span class="hl">zmysłami</span>. Mamy ich pięć:</p>
+    <ul>
+      <li><b>wzrok</b> (oczy): kolory, kształty, ruch,</li>
+      <li><b>słuch</b> (uszy): śpiew ptaków, szum wiatru,</li>
+      <li><b>węch</b> (nos): zapach kwiatów, dymu,</li>
+      <li><b>smak</b> (język): słodkie, słone, kwaśne, gorzkie,</li>
+      <li><b>dotyk</b> (skóra): gładkie, szorstkie, ciepłe, zimne.</li>
+    </ul>
+    <p class="tip">Bezpieczeństwo przede wszystkim: <b>nigdy</b> nie smakuj nieznanych roślin, grzybów ani owoców. Nie dotykaj dzikich zwierząt.</p>
+    <p><b>Trzy sposoby badania przyrody:</b></p>
+    <ul>
+      <li><span class="hl">obserwacja</span>: uważnie się przyglądamy, ale niczego nie zmieniamy (np. jak pająk tka sieć),</li>
+      <li><span class="hl">doświadczenie</span>: celowo zmieniamy warunki i sprawdzamy, co się stanie (np. czy cukier szybciej rozpuści się w ciepłej wodzie),</li>
+      <li><span class="hl">pomiar</span>: mierzymy przyrządem i zapisujemy wynik <b>z jednostką</b> (np. 18°C, 25 cm).</li>
+    </ul>
+    <p><b>Przyrządy przyrodnika:</b> <b>lupa</b> powiększa małe rzeczy kilka razy, <b>lornetka</b> przybliża odległe obiekty, <b>mikroskop</b> pokazuje to, czego nie widać gołym okiem, <b>termometr</b> mierzy temperaturę, <b>taśma miernicza</b> długość, <b>waga</b> masę, <b>stoper</b> czas, a <b>kompas</b> wyznacza kierunki.</p>
+    <p><b>Skąd jeszcze czerpiemy wiedzę o przyrodzie?</b> Z książek, atlasów i encyklopedii, filmów przyrodniczych, internetu, muzeów, ogrodów zoologicznych i botanicznych.</p>
+  </div>
+  <div class="game"><div class="game-title">Część 1: Obserwacja, doświadczenie czy pomiar?</div><div id="g4a"></div></div>
+  <div class="game"><div class="game-title">Część 2: Czego użyjesz?</div><div id="g4b"></div></div>
+</section>
+
+<!-- 5 -->
+<section class="topic" id="t5">
+  <div class="topic-head"><span class="num">5</span><h2>Myślę i działam jak przyrodnik</h2><span class="star" data-star="5">★</span></div>
+  <div class="notes">
+    <span class="label">Ściąga</span>
+    <p>Przyrodnik jest ciekawy świata, uważny, cierpliwy i dokładny. Wszystko zapisuje i szanuje przyrodę. Doświadczenie prowadzi krok po kroku:</p>
+    <ol>
+      <li><span class="hl">Pytanie badawcze</span> (problem): czego chcę się dowiedzieć?</li>
+      <li><span class="hl">Hipoteza</span>: moje przypuszczenie, czyli jak myślę, jaka będzie odpowiedź.</li>
+      <li><b>Plan</b>: czego potrzebuję i jak to zrobię.</li>
+      <li><b>Przeprowadzenie doświadczenia</b> i obserwacja.</li>
+      <li><b>Wyniki</b>: zapisuję, co zobaczyłem (tabelka, rysunek, zdjęcie).</li>
+      <li><span class="hl">Wniosek</span>: odpowiedź na pytanie. Sprawdzam, czy hipoteza była prawdziwa.</li>
+    </ol>
+    <div class="two">
+      <div class="rule"><b>Próba kontrolna</b><span>Zestaw w zwykłych warunkach. Niczego w nim nie zmieniamy, służy do porównania.</span></div>
+      <div class="rule"><b>Próba badawcza</b><span>Zestaw, w którym zmieniamy <b>tylko jeden</b> warunek, ten, który badamy.</span></div>
+    </div>
+    <p class="tip">Przykład: <b>Czy rzeżucha potrzebuje światła?</b> Siejemy ją w dwóch miseczkach i obie podlewamy tak samo. Jedna stoi na parapecie (próba kontrolna), druga w ciemnej szafce (próba badawcza).</p>
+  </div>
+  <div class="game"><div class="game-title">Część 1: Ułóż kroki doświadczenia z rzeżuchą</div><div id="g5a"></div></div>
+  <div class="game"><div class="game-title">Część 2: Pytania o doświadczenie</div><div id="g5b"></div></div>
+</section>
+
+<!-- 6 -->
+<section class="topic" id="t6">
+  <div class="topic-head"><span class="num">6</span><h2>Obserwuję przyrodę pod mikroskopem</h2><span class="star" data-star="6">★</span></div>
+  <div class="notes">
+    <span class="label">Ściąga</span>
+    <p><span class="hl">Mikroskop</span> pozwala zobaczyć to, czego nie widać gołym okiem, np. komórki skórki cebuli. Lupa powiększa kilka razy, a szkolny mikroskop nawet kilkaset razy.</p>
+    <div class="rule"><b>Jak obliczyć powiększenie?</b><span>Mnożymy powiększenie okularu przez powiększenie obiektywu: <b>10× · 40× = 400×</b>.</span></div>
+    <p><b>Jak zrobić preparat?</b> Na szkiełko podstawowe kładziemy kroplę wody, na nią cienką skórkę cebuli i przykrywamy szkiełkiem nakrywkowym.</p>
+    <p><b>Zasady pracy:</b></p>
+    <ul>
+      <li>Mikroskop przenosimy oburącz: jedną ręką za statyw (ramię), drugą pod podstawę.</li>
+      <li>Zaczynamy od <b>najmniejszego</b> powiększenia.</li>
+      <li>Ostrość ustawiamy najpierw śrubą <b>makrometryczną</b> (dużą), potem <b>mikrometryczną</b> (małą).</li>
+      <li>Nie dotykamy palcami soczewek.</li>
+    </ul>
+  </div>
+  <div class="scope" style="margin-top:14px">
+    <svg id="scope" viewBox="40 20 250 370" role="img" aria-label="Rysunek mikroskopu z częściami do klikania">
+      <g class="mp" data-part="podstawa"><path d="M70 362h190a10 10 0 0 1 10 10v8H60v-8a10 10 0 0 1 10-10z"/></g>
+      <g class="mp" data-part="statyw"><path d="M88 362 L128 362 L128 292 Q128 214 192 156 L178 128 Q92 196 88 292 Z"/></g>
+      <g class="mp" data-part="lusterko"><rect class="hit" x="172" y="306" width="56" height="54"/><path d="M196 330h8v32h-8z"/><ellipse class="glass" cx="200" cy="322" rx="22" ry="8"/></g>
+      <g class="mp" data-part="stolik"><rect class="hit" x="120" y="262" width="150" height="16"/><path d="M120 264h70v10h-70zM210 264h60v10h-60z"/><path d="M190 266h20v6h-20z"/></g>
+      <g class="mp" data-part="lapki"><rect class="hit" x="136" y="244" width="128" height="18"/><path d="M140 256h40v6h-40zM220 256h40v6h-40z"/><circle cx="143" cy="259" r="4"/><circle cx="257" cy="259" r="4"/></g>
+      <g class="mp" data-part="tubus"><rect x="185" y="72" width="30" height="110"/></g>
+      <g class="mp" data-part="okular"><rect x="179" y="36" width="42" height="36" rx="4"/><rect class="glass" x="185" y="32" width="30" height="6" rx="2"/></g>
+      <g class="mp" data-part="rewolwer"><path d="M174 182h52l10 16h-72z"/></g>
+      <g class="mp" data-part="obiektywy"><rect class="hit" x="150" y="196" width="100" height="44"/><rect x="191" y="198" width="18" height="36" rx="3"/><rect class="glass" x="194" y="231" width="12" height="5" rx="2"/><rect x="164" y="194" width="14" height="26" rx="3" transform="rotate(28 171 194)"/><rect x="222" y="194" width="14" height="22" rx="3" transform="rotate(-28 229 194)"/></g>
+      <g class="mp" data-part="makro"><circle cx="114" cy="228" r="17"/><circle cx="114" cy="228" r="7"/></g>
+      <g class="mp" data-part="mikro"><rect class="hit" x="92" y="268" width="28" height="28"/><circle cx="106" cy="282" r="9"/><circle cx="106" cy="282" r="3"/></g>
+    </svg>
+    <div style="display:grid;gap:10px;min-width:0">
+      <p class="small">Kliknij nazwę albo część na rysunku, żeby dowiedzieć się, do czego służy.</p>
+      <div class="parts" id="parts"></div>
+      <div class="part-info" id="part-info"><span class="small">Tu pojawi się opis wybranej części.</span></div>
+    </div>
+  </div>
+  <div class="tool" style="margin-top:14px">
+    <b>Zajrzyj do mikroskopu: skórka cebuli</b>
+    <div class="tool-row" style="align-items:center">
+      <svg class="field" viewBox="0 0 200 200" aria-hidden="true">
+        <defs>
+          <pattern id="cells" width="50" height="40" patternUnits="userSpaceOnUse" patternTransform="scale(1)">
+            <rect x="0" y="0" width="50" height="40" fill="#f7efd0"/>
+            <g fill="none" stroke="#b49a5a" stroke-width="1.5" vector-effect="non-scaling-stroke"><rect x="0" y="0" width="50" height="20"/><rect x="-25" y="20" width="50" height="20"/><rect x="25" y="20" width="50" height="20"/></g>
+            <circle cx="30" cy="10" r="3.2" fill="#9a6f3a"/><circle cx="8" cy="30" r="3.2" fill="#9a6f3a"/><circle cx="40" cy="31" r="3.2" fill="#9a6f3a"/>
+          </pattern>
+          <clipPath id="fc"><circle cx="100" cy="100" r="94"/></clipPath>
+        </defs>
+        <rect x="0" y="0" width="200" height="200" fill="url(#cells)" clip-path="url(#fc)"/>
+        <circle class="rim" cx="100" cy="100" r="95"/>
+      </svg>
+      <div style="display:grid;gap:10px">
+        <div class="tool-row"><label for="m-ok" class="small">Okular</label><select id="m-ok"><option>5</option><option selected>10</option><option>15</option></select>
+          <label for="m-ob" class="small">Obiektyw</label><select id="m-ob"><option selected>4</option><option>10</option><option>40</option></select></div>
+        <div class="big-out" id="m-out"></div>
+        <div class="small" id="m-why"></div>
+      </div>
+    </div>
+  </div>
+  <div class="game"><div class="game-title">Część 1: Znajdź na rysunku</div><div id="g6a"></div></div>
+  <div class="game"><div class="game-title">Część 2: Pytania o mikroskop</div><div id="g6b"></div></div>
+</section>
+
+<!-- 7 -->
+<section class="topic" id="t7">
+  <div class="topic-head"><span class="num">7</span><h2>Posługuję się kompasem</h2><span class="star" data-star="7">★</span></div>
+  <div class="notes">
+    <span class="label">Ściąga</span>
+    <p>Są cztery <span class="hl">kierunki główne</span>: <b>północ (N)</b>, <b>południe (S)</b>, <b>wschód (E)</b> i <b>zachód (W)</b>. Pomiędzy nimi leżą <span class="hl">kierunki pośrednie</span>: północny wschód (NE), południowy wschód (SE), południowy zachód (SW) i północny zachód (NW). Rysunek kierunków to <b>róża wiatrów</b>.</p>
+    <p><span class="hl">Kompas</span> ma tarczę z oznaczeniami kierunków i <b>igłę magnetyczną</b>. Igła zawsze ustawia się na linii północ–południe. Jej ciemny (często czerwony) koniec wskazuje <b>północ</b>.</p>
+    <p><b>Jak używać kompasu?</b></p>
+    <ol>
+      <li>Połóż kompas poziomo, z dala od metalu, magnesów i urządzeń elektrycznych, bo mogą zmylić igłę.</li>
+      <li>Poczekaj, aż igła się uspokoi.</li>
+      <li>Obracaj kompas, aż litera <b>N</b> znajdzie się pod ciemnym końcem igły. Kompas jest teraz <b>zorientowany</b>.</li>
+      <li>Odczytaj kierunki z tarczy.</li>
+    </ol>
+    <p><b>A bez kompasu?</b></p>
+    <ul>
+      <li><b>Słońce</b> rano jest na wschodzie, w południe na południu (zimą ok. godz. 12, latem ok. 13), a wieczorem zachodzi na zachodzie.</li>
+      <li>W południe cień patyka wbitego w ziemię (<b>gnomonu</b>) jest najkrótszy i wskazuje <b>północ</b>.</li>
+      <li>Nocą północ wskazuje <b>Gwiazda Polarna</b>.</li>
+    </ul>
+    <p class="tip">Mech na pniach i mrowiska przy drzewach to niepewne wskazówki. Lepiej im nie ufać.</p>
+  </div>
+  <div class="game">
+    <div class="game-title">Część 1: Zorientuj kompas na biwaku</div>
+    <div class="cmp-wrap">
+      <svg class="cmp" viewBox="0 0 400 400" role="img" aria-label="Mapa okolicy biwaku z kompasem w środku">
+        <g aria-hidden="true">
+          <polygon points="160,62 195,14 230,62" fill="var(--mount)"/><polygon points="196,62 226,24 256,62" fill="var(--mount)"/><polygon points="187,26 195,14 203,26" fill="var(--card)"/>
+          <text x="208" y="82" text-anchor="middle">góry</text>
+          <rect x="318" y="38" width="16" height="40" fill="var(--roof)"/><polygon points="312,40 326,22 340,40" fill="var(--metal)"/><text x="326" y="98" text-anchor="middle">wieża</text>
+          <ellipse cx="350" cy="196" rx="38" ry="24" fill="var(--water)"/><text x="350" y="236" text-anchor="middle">jezioro</text>
+          <rect x="172" y="340" width="22" height="18" fill="var(--card)" stroke="var(--ink)"/><polygon points="168,342 183,328 198,342" fill="var(--roof)"/>
+          <rect x="206" y="344" width="22" height="14" fill="var(--card)" stroke="var(--ink)"/><polygon points="202,346 217,334 232,346" fill="var(--roof)"/>
+          <text x="200" y="380" text-anchor="middle">wieś</text>
+          <g fill="var(--forest)"><path d="M30 170l12 24H18z"/><path d="M52 160l12 24H40z"/><path d="M42 190l12 24H30z"/><path d="M64 186l12 24H52z"/></g><text x="48" y="232" text-anchor="middle">las</text>
+          <g stroke="var(--ink-soft)" stroke-width="2" stroke-dasharray="4 5" fill="none"><path d="M200 120V90"/><path d="M200 280v42"/><path d="M120 200H86"/><path d="M280 200h28"/></g>
+        </g>
+        <circle cx="200" cy="200" r="80" fill="var(--card)" stroke="var(--ink)" stroke-width="3"/>
+        <g id="dial">
+          <circle cx="200" cy="200" r="70" fill="var(--soft)" stroke="var(--line)" stroke-width="2"/>
+          <g stroke="var(--ink)" stroke-width="2">
+            <line x1="200" y1="132" x2="200" y2="142"/><line x1="268" y1="200" x2="258" y2="200"/><line x1="200" y1="268" x2="200" y2="258"/><line x1="132" y1="200" x2="142" y2="200"/>
+            <line x1="248" y1="152" x2="242" y2="158"/><line x1="248" y1="248" x2="242" y2="242"/><line x1="152" y1="248" x2="158" y2="242"/><line x1="152" y1="152" x2="158" y2="158"/>
+          </g>
+          <text class="dial-l" x="200" y="163" text-anchor="middle" style="fill:var(--red)">N</text>
+          <text class="dial-l" x="242" y="207" text-anchor="middle">E</text>
+          <text class="dial-l" x="200" y="252" text-anchor="middle">S</text>
+          <text class="dial-l" x="158" y="207" text-anchor="middle">W</text>
+        </g>
+        <g class="needle" id="needle">
+          <polygon points="200,142 208,200 192,200" fill="var(--red)"/>
+          <polygon points="200,258 208,200 192,200" fill="var(--metal-2)"/>
+          <circle cx="200" cy="200" r="5" fill="var(--ink)"/>
+        </g>
+      </svg>
+      <div style="display:grid;gap:12px;min-width:0">
+        <p>Jesteś na biwaku w środku mapy. Igła już wskazuje północ, ale tarcza jest przekręcona. Obróć tarczę, aż litera <b>N</b> znajdzie się pod <b>czerwonym</b> końcem igły.</p>
+        <div class="tool-row"><button class="btn ghost" id="rot-l" aria-label="Obróć w lewo o 15 stopni">↺ 15°</button><button class="btn ghost" id="rot-r" aria-label="Obróć w prawo o 15 stopni">↻ 15°</button></div>
+        <input id="rot" type="range" min="-180" max="180" step="1" value="120" aria-label="Obrót tarczy kompasu">
+        <p class="cmp-status" id="cmp-status">Kompas nie jest jeszcze zorientowany.</p>
+      </div>
+    </div>
+    <div id="g7a" hidden></div>
+  </div>
+  <div class="game"><div class="game-title">Część 2: Kierunki bez kompasu</div><div id="g7b"></div></div>
+</section>
+
+<!-- final -->
+<section class="topic" id="quiz">
+  <div class="topic-head"><span class="num" style="background:var(--sun);color:#1f2d1c">★</span><h2>Wielki Sprawdzian</h2></div>
+  <div class="notes"><p>15 losowych pytań ze wszystkich tematów. Na końcu dostaniesz ocenę i listę rzeczy do powtórki. Każda próba losuje inne pytania.</p></div>
+  <div class="game" id="final"></div>
+</section>
+
+<footer>Powodzenia na sprawdzianie! Klio trzyma kciuki (a raczej pióra).</footer>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+const $=(s,r=document)=>r.querySelector(s);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const KEY='klio-przyroda-4';
+const SHORT=['Co to jest przyroda?','Sposób na naukę','Czas przed ekranem','Badam przyrodę','Jak przyrodnik','Mikroskop','Kompas'];
+const TOTAL=SHORT.length;
+let done=new Set(),best=null;
+try{const s=JSON.parse(localStorage.getItem(KEY)||'{}');done=new Set(s.done||[]);best=s.best??null;}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify({done:[...done],best}));}catch(e){}};
+const fmt=n=>n.toLocaleString('pl-PL',{maximumFractionDigits:1});
+
+$('#stops').innerHTML=SHORT.map((t,i)=>`<li><a href="#t${i+1}" data-stop="${i+1}"><span class="n">${i+1}</span><span class="t">${t}</span><span class="s">★</span></a></li>`).join('')
+ +`<li><a href="#quiz" class="final"><span class="n">★</span><span class="t">Wielki Sprawdzian</span><span class="s" id="best" style="color:var(--leaf);font-size:.85rem;font-weight:800"></span></a></li>`;
+function paint(){
+  document.querySelectorAll('[data-star]').forEach(s=>s.classList.toggle('on',done.has(+s.dataset.star)));
+  document.querySelectorAll('[data-stop]').forEach(a=>a.classList.toggle('done',done.has(+a.dataset.stop)));
+  $('#count').textContent=`${done.size} / ${TOTAL} ★`;
+  $('#meter').style.width=(done.size/TOTAL*100)+'%';
+  $('#best').textContent=best!=null?`${best}/15`:'';
+}
+const CHEERS=['Super! Gwiazdka zdobyta','Brawo! Kolejna gwiazdka','Świetnie! Klio jest dumna','Mistrzowsko! Gwiazdka dla Ciebie'];
+function win(n){
+  if(!done.has(n)){done.add(n);save();paint();toast(CHEERS[n%CHEERS.length]+' ★');confetti(60);
+    if(done.size===TOTAL)setTimeout(()=>toast('Wszystkie gwiazdki! Czas na Wielki Sprawdzian'),2600);}
+}
+function parts(n,k){const got=new Set();return id=>{if(got.has(id))return;got.add(id);
+  if(got.size>=k)win(n);else if(!done.has(n))toast(`Część zaliczona! Do gwiazdki brakuje jeszcze ${k-got.size}`);};}
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2400);}
+function shakeEl(e){e.classList.remove('shake');void e.offsetWidth;e.classList.add('shake');}
+
+/* engines */
+function mcq(root,qs,onWin){
+  let answered=0,good=0;
+  function render(){answered=0;good=0;
+    root.innerHTML=qs.map((q,i)=>`<div class="q" data-i="${i}"><p class="q-t">${q.q}</p><div class="opts">${q.o.map((o,j)=>`<button class="opt" data-j="${j}">${o}</button>`).join('')}</div><p class="fb" hidden></p></div>`).join('')
+      +`<div class="foot"><span class="score"></span><button class="btn ghost again" hidden>Spróbuj jeszcze raz</button></div>`;}
+  root.onclick=e=>{
+    if(e.target.closest('.again')){render();return;}
+    const b=e.target.closest('.opt');if(!b||b.disabled)return;
+    const qe=b.closest('.q'),q=qs[+qe.dataset.i],ok=+b.dataset.j===q.a;
+    qe.querySelectorAll('.opt').forEach((x,k)=>{x.disabled=true;if(k===q.a)x.classList.add('right');});
+    if(!ok)b.classList.add('wrong');
+    const fb=qe.querySelector('.fb');fb.hidden=false;fb.innerHTML=(ok?'<b class="ok">Dobrze!</b> ':'<b class="no">Ups!</b> ')+(q.w||'');
+    answered++;if(ok)good++;
+    if(answered===qs.length){root.querySelector('.score').textContent=`Wynik: ${good} / ${qs.length}`;
+      if(good===qs.length)onWin();else root.querySelector('.again').hidden=false;}
+  };
+  render();
+}
+function multi(root,items,onWin){
+  root.innerHTML=`<div class="order-pool">${shuffle(items.map((_,i)=>i)).map(i=>`<button class="chip" data-i="${i}" aria-pressed="false">${items[i].t}</button>`).join('')}</div>
+   <div class="foot"><button class="btn check">Sprawdź</button><span class="fb msg"></span></div>`;
+  root.onclick=e=>{
+    const c=e.target.closest('.chip');
+    if(c){root.querySelectorAll('.chip').forEach(x=>x.classList.remove('right','wrong','missed'));
+      const on=!c.classList.contains('sel');c.classList.toggle('sel',on);c.setAttribute('aria-pressed',on);root.querySelector('.msg').textContent='';return;}
+    if(e.target.closest('.check')){let bad=0,miss=0;
+      root.querySelectorAll('.chip').forEach(x=>{const it=items[+x.dataset.i],s=x.classList.contains('sel');
+        if(s&&it.ok)x.classList.add('right');else if(s&&!it.ok){x.classList.add('wrong');bad++;}else if(!s&&it.ok){x.classList.add('missed');miss++;}});
+      const m=root.querySelector('.msg');
+      if(!bad&&!miss){m.innerHTML='<b class="ok">Idealnie!</b> Wszystkie dobre odpowiedzi.';onWin();}
+      else m.innerHTML=`<b class="no">Prawie.</b> ${bad?`Czerwone nie pasują (${bad}). `:''}${miss?`Brakuje jeszcze ${miss}: popraw i sprawdź ponownie.`:'Odznacz je i sprawdź ponownie.'}`;}
+  };
+}
+function sorter(root,items,buckets,onWin){
+  let left=items.length;
+  root.innerHTML=shuffle(items.map((_,i)=>i)).map(i=>`<div class="sort-row" data-i="${i}"><span class="it">${items[i].t}</span><span class="bks">${buckets.map((b,k)=>`<button class="bucket" data-k="${k}">${b}</button>`).join('')}</span><span class="note" hidden></span></div>`).join('')
+    +`<div class="foot"><span class="score">Zostało: ${left}</span></div>`;
+  root.onclick=e=>{
+    const b=e.target.closest('.bucket');if(!b||b.disabled)return;
+    const row=b.closest('.sort-row'),it=items[+row.dataset.i],note=row.querySelector('.note');note.hidden=false;
+    if(+b.dataset.k===it.b){row.classList.add('ok');row.querySelectorAll('.bucket').forEach(x=>x.disabled=true);b.classList.add('right');
+      note.innerHTML='<b class="ok">Tak!</b> '+(it.n||'');left--;root.querySelector('.score').textContent=left?`Zostało: ${left}`:'Wszystko posortowane!';if(!left)onWin();}
+    else{shakeEl(row);note.innerHTML='<b class="no">Nie tym razem.</b> '+(it.h||'Pomyśl jeszcze raz.');}
+  };
+}
+function orderer(root,items,onWin,label){
+  let next=0,miss=0;
+  function render(){next=0;miss=0;
+    root.innerHTML=`<div class="order-pool">${shuffle(items.map((_,i)=>i)).map(i=>`<button class="chip" data-i="${i}">${items[i].t}${items[i].d?`<span class="dt">${items[i].d}</span>`:''}</button>`).join('')}</div>
+      <div class="foot"><span class="fb msg">${label||'Klikaj po kolei, zaczynając od pierwszego.'}</span><button class="btn ghost again">Od nowa</button></div>`;}
+  root.onclick=e=>{
+    if(e.target.closest('.again')){render();return;}
+    const c=e.target.closest('.chip');if(!c||c.disabled)return;
+    const m=root.querySelector('.msg');
+    if(+c.dataset.i===next){c.disabled=true;c.classList.add('right');c.insertAdjacentHTML('afterbegin',`<span class="badge">${next+1}</span>`);next++;
+      if(next===items.length){m.innerHTML=miss?`<b class="ok">Gotowe!</b> Pomyłki: ${miss}. Ułóż bez pomyłki, żeby zaliczyć.`:'<b class="ok">Bezbłędnie!</b>';if(!miss)onWin();}
+      else m.innerHTML='<b class="ok">Dobrze!</b> Co dalej?';}
+    else{miss++;shakeEl(c);c.classList.add('wrong');setTimeout(()=>c.classList.remove('wrong'),500);m.innerHTML=`<b class="no">To jeszcze nie teraz.</b> ${items[next].h||''}`;}
+  };
+  render();
+}
+
+/* 1 */
+const p1=parts(1,2);
+sorter($('#g1a'),[
+ {t:'dąb',b:0,n:'Roślina to organizm żywy.'},
+ {t:'mrówka',b:0,n:'Zwierzęta to organizmy żywe.'},
+ {t:'grzyb borowik',b:0,n:'Grzyby to organizmy żywe.'},
+ {t:'człowiek',b:0,n:'Człowiek też jest częścią przyrody ożywionej!',h:'Człowiek oddycha, rośnie i odżywia się…'},
+ {t:'kamień',b:1,n:'Skały należą do przyrody nieożywionej.'},
+ {t:'woda w jeziorze',b:1,n:'Woda to przyroda nieożywiona.'},
+ {t:'Słońce',b:1,n:'Słońce daje światło i ciepło, ale nie jest organizmem.',h:'Czy Słońce oddycha, je i rozmnaża się?'},
+ {t:'powietrze',b:1,n:'Powietrze to przyroda nieożywiona.'},
+ {t:'rower',b:2,n:'Zrobił go człowiek.'},
+ {t:'plastikowa butelka',b:2,n:'To wytwór człowieka.'},
+ {t:'drewniana ławka',b:2,n:'Drewno pochodzi z drzewa, ale ławkę zrobił człowiek.',h:'Kto zrobił ławkę?'}
+],['ożywiona','nieożywiona','wytwór człowieka'],()=>p1('a'));
+multi($('#g1b'),[
+ {t:'oddychają',ok:true},{t:'odżywiają się',ok:true},{t:'rosną i rozwijają się',ok:true},{t:'rozmnażają się',ok:true},
+ {t:'reagują na otoczenie',ok:true},{t:'wydalają zbędne substancje',ok:true},
+ {t:'są zrobione z metalu',ok:false},{t:'nigdy się nie zmieniają',ok:false},{t:'świecą w ciemności',ok:false}
+],()=>p1('b'));
+
+/* 2 */
+const p2=parts(2,2);
+multi($('#g2a'),[
+ {t:'ciche, jasne, przewietrzone miejsce',ok:true},{t:'krótkie przerwy z ruchem',ok:true},{t:'powtarzanie przez kilka dni',ok:true},
+ {t:'wyspanie się',ok:true},{t:'szklanka wody',ok:true},{t:'mapa myśli i kolorowe notatki',ok:true},{t:'tłumaczenie materiału komuś innemu',ok:true},
+ {t:'włączony telewizor obok',ok:false},{t:'nauka całą noc przed sprawdzianem',ok:false},{t:'telefon z powiadomieniami na biurku',ok:false}
+],()=>p2('a'));
+sorter($('#g2b'),[
+ {t:'Rysuję schematy i kolorowe notatki',b:0,n:'Wzrokowiec lubi to, co widzi.'},
+ {t:'Oglądam film przyrodniczy z ilustracjami',b:0,n:'Obraz pomaga wzrokowcowi.'},
+ {t:'Czytam notatki na głos',b:1,n:'Słuchowiec zapamiętuje to, co słyszy.'},
+ {t:'Rozmawiam o lekcji z kolegą',b:1,n:'Rozmowa pomaga słuchowcowi.'},
+ {t:'Buduję model i robię doświadczenia',b:2,n:'Czuciowiec uczy się przez działanie.'},
+ {t:'Chodzę po pokoju i powtarzam',b:2,n:'Ruch pomaga czuciowcowi.',h:'Tu ważny jest ruch.'}
+],['wzrokowiec','słuchowiec','czuciowiec'],()=>p2('b'));
+
+/* 3 calculator */
+function st(){
+  const v=['phone','tv','game'].map(k=>{const x=+$('#st-'+k).value;$('#o-'+k).textContent=fmt(x)+' h';return x;});
+  const t=v.reduce((a,b)=>a+b,0),fill=$('#st-fill');
+  fill.style.width=Math.min(t/8,1)*100+'%';
+  fill.style.background=t<=2?'var(--ok)':t<=3.5?'var(--sun)':'var(--red)';
+  $('#st-out').textContent=`Razem: ${fmt(t)} h dziennie`;
+  const y=t*365;
+  $('#st-year').innerHTML=t?`W tygodniu to <b>${fmt(t*7)} h</b>, a w roku aż <b>${fmt(y)} h</b>, czyli ok. <b>${fmt(Math.round(y/24))} dób</b> bez przerwy przed ekranem!`:'Zero godzin? Klio jest pod wrażeniem!';
+  $('#st-msg').textContent=t<=2?'Świetnie! Mieścisz się w zalecanym limicie.':t<=3.5?'Trochę za dużo. Zamień jedną godzinę na zabawę na podwórku, książkę albo grę planszową.':'Zdecydowanie za dużo. Oczy, plecy i sen na tym cierpią. Spróbuj co dzień skracać czas przed ekranem o pół godziny.';
+}
+['phone','tv','game'].forEach(k=>$('#st-'+k).addEventListener('input',st));st();
+mcq($('#g3'),[
+ {q:'Zasada 20-20-20: co 20 minut patrzę przez 20 sekund na coś odległego o ok. 6 metrów.',o:['Prawda','Fałsz'],a:0,w:'Dzięki temu oczy odpoczywają. A 6 metrów to właśnie 20 stóp: 20 minut, 20 sekund, 20 stóp.'},
+ {q:'Granie na telefonie tuż przed snem pomaga szybko zasnąć.',o:['Prawda','Fałsz'],a:1,w:'Światło ekranu utrudnia zasypianie. Odłóż ekran ok. godzinę przed snem.'},
+ {q:'Długie siedzenie przed ekranem może powodować wady postawy.',o:['Prawda','Fałsz'],a:0,w:'Garbimy się i za mało ruszamy.'},
+ {q:'Im bliżej oczu trzymam ekran, tym lepiej dla wzroku.',o:['Prawda','Fałsz'],a:1,w:'Ekran trzymamy w odległości wyciągniętej ręki.'},
+ {q:'Dzieci powinny się ruszać co najmniej 60 minut dziennie.',o:['Prawda','Fałsz'],a:0}
+],()=>win(3));
+
+/* 4 */
+const p4=parts(4,2);
+sorter($('#g4a'),[
+ {t:'Patrzę, jak pająk tka sieć',b:0,n:'Tylko się przyglądam, niczego nie zmieniam.'},
+ {t:'Oglądam przez lornetkę sarny na łące',b:0,n:'To obserwacja.'},
+ {t:'Sprawdzam, czy cukier szybciej rozpuści się w ciepłej wodzie niż w zimnej',b:1,n:'Celowo zmieniam warunki (temperaturę wody).',h:'Czy coś tu celowo zmieniam?'},
+ {t:'Sprawdzam, czy fasola wykiełkuje bez wody',b:1,n:'To doświadczenie.'},
+ {t:'Mierzę termometrem temperaturę powietrza',b:2,n:'Wynik zapiszę z jednostką, np. 15°C.'},
+ {t:'Mierzę linijką, o ile centymetrów urosła roślina',b:2,n:'To pomiar.',h:'Używam przyrządu i dostaję liczbę.'}
+],['obserwacja','doświadczenie','pomiar'],()=>p4('a'));
+mcq($('#g4b'),[
+ {q:'Chcesz obejrzeć z bliska skrzydło muchy. Czego użyjesz?',o:['lupy','lornetki','termometru'],a:0},
+ {q:'Ptak siedzi na czubku wysokiego drzewa. Czego użyjesz?',o:['mikroskopu','lornetki','wagi'],a:1,w:'Lornetka przybliża odległe obiekty.'},
+ {q:'Którym zmysłem rozpoznasz śpiew kosa?',o:['węchem','słuchem','dotykiem'],a:1},
+ {q:'Na leśnej polanie rosną nieznane czerwone jagody. Co robisz?',o:['próbuję jedną','oglądam i fotografuję, ale nie jem','zbieram do kieszeni na później'],a:1,w:'Nigdy nie smakujemy nieznanych roślin. Mogą być trujące!'},
+ {q:'Czym zmierzysz masę jabłka?',o:['wagą','stoperem','kompasem'],a:0}
+],()=>p4('b'));
+
+/* 5 */
+const p5=parts(5,2);
+orderer($('#g5a'),[
+ {t:'Zadaję pytanie badawcze',d:'Czy rzeżucha potrzebuje światła?',h:'Na początku zawsze jest pytanie.'},
+ {t:'Stawiam hipotezę',d:'Myślę, że bez światła będzie słabo rosła.',h:'Teraz przypuszczenie, czyli co myślę.'},
+ {t:'Planuję doświadczenie',d:'Dwie miseczki: parapet i ciemna szafka.',h:'Zanim zacznę, muszę wszystko zaplanować.'},
+ {t:'Przeprowadzam doświadczenie',d:'Przez tydzień podlewam obie tak samo.',h:'Czas działać!'},
+ {t:'Zapisuję wyniki',d:'W szafce rzeżucha jest blada i wiotka.',h:'Co zobaczyłem? Trzeba to zapisać.'},
+ {t:'Formułuję wniosek',d:'Rzeżucha potrzebuje światła. Hipoteza się potwierdziła.',h:'Ostatni krok to odpowiedź na pytanie.'}
+],()=>p5('a'),'Kliknij pierwszy krok.');
+mcq($('#g5b'),[
+ {q:'Która miseczka to próba kontrolna?',o:['ta na parapecie (zwykłe warunki)','ta w ciemnej szafce'],a:0,w:'W próbie kontrolnej niczego nie zmieniamy.'},
+ {q:'Który warunek zmieniliśmy w próbie badawczej?',o:['ilość wody','dostęp do światła','rodzaj nasion'],a:1},
+ {q:'Dlaczego obie miseczki podlewamy tak samo?',o:['bo tak jest szybciej','żeby różniło je tylko jedno: światło','bo rzeżucha nie lubi wody'],a:1,w:'Zmieniamy zawsze tylko jeden warunek. Inaczej nie wiadomo, co spowodowało różnicę.'},
+ {q:'„Myślę, że bez światła rzeżucha będzie słabo rosła” to…',o:['hipoteza','wniosek','pytanie badawcze'],a:0}
+],()=>p5('b'));
+
+/* 6 microscope */
+const PARTS={
+ okular:['okular','Soczewka, przez którą patrzymy. Powiększa obraz, np. 10 razy (10×).'],
+ tubus:['tubus','Rura, która łączy okular z obiektywami.'],
+ rewolwer:['rewolwer','Obrotowa tarcza z przykręconymi obiektywami. Obracając ją, zmieniamy obiektyw.'],
+ obiektywy:['obiektywy','Soczewki skierowane na preparat. Mają różne powiększenia, np. 4×, 10×, 40×.'],
+ stolik:['stolik','Na nim kładziemy preparat. W środku ma otwór, przez który przechodzi światło.'],
+ lapki:['łapki (zaciski)','Przytrzymują szkiełko z preparatem, żeby się nie przesuwało.'],
+ lusterko:['lusterko (oświetlacz)','Kieruje światło od dołu na preparat. W nowszych mikroskopach zamiast lusterka jest lampka.'],
+ makro:['śruba makrometryczna','Duża śruba. Szybko podnosi lub opuszcza stolik albo tubus. Służy do wstępnego ustawienia ostrości.'],
+ mikro:['śruba mikrometryczna','Mała śruba do dokładnego ustawienia ostrości.'],
+ statyw:['statyw (ramię)','Łączy wszystkie części. Za niego trzymamy mikroskop przy przenoszeniu.'],
+ podstawa:['podstawa','Dzięki niej mikroskop stoi stabilnie.']
+};
+const scope=$('#scope'),info=$('#part-info');
+$('#parts').innerHTML=Object.keys(PARTS).map(k=>`<button data-p="${k}" aria-pressed="false">${PARTS[k][0]}</button>`).join('');
+let hunt=null;
+function showPart(k){
+  scope.classList.add('focus');
+  scope.querySelectorAll('.mp').forEach(g=>g.classList.toggle('hi',g.dataset.part===k));
+  document.querySelectorAll('#parts button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.p===k));
+  info.innerHTML=`<b>${PARTS[k][0]}</b><br>${PARTS[k][1]}`;
+}
+$('#parts').addEventListener('click',e=>{const b=e.target.closest('[data-p]');if(b){if(hunt)stopHunt();showPart(b.dataset.p);}});
+scope.addEventListener('click',e=>{
+  const g=e.target.closest('.mp');if(!g)return;const k=g.dataset.part;
+  if(!hunt){showPart(k);return;}
+  if(k===hunt.target){hunt.hits++;g.classList.add('hi');scope.classList.add('focus');
+    hunt.root.querySelector('.fb').innerHTML=`<b class="ok">Tak!</b> To ${PARTS[k][0]}.`;
+    if(hunt.hits>=6){hunt.root.querySelector('.q-t').textContent='Znalazłeś 6 części!';hunt.root.querySelector('.score').textContent='Trafienia: 6 / 6';hunt=null;p6('a');
+      setTimeout(()=>{scope.classList.remove('focus');scope.querySelectorAll('.mp').forEach(x=>x.classList.remove('hi'));},900);return;}
+    setTimeout(nextHunt,700);}
+  else{g.classList.add('bad');scope.classList.add('focus');setTimeout(()=>g.classList.remove('bad'),500);
+    hunt.root.querySelector('.fb').innerHTML=`<b class="no">To nie to.</b> Kliknąłeś: ${PARTS[k][0]}.`;}
+});
+function nextHunt(){
+  if(!hunt)return;scope.classList.remove('focus');scope.querySelectorAll('.mp').forEach(x=>x.classList.remove('hi','bad'));
+  if(!hunt.pool.length)hunt.pool=shuffle(Object.keys(PARTS));
+  hunt.target=hunt.pool.pop();
+  hunt.root.querySelector('.q-t').innerHTML=`Kliknij na rysunku: <span class="hl">${PARTS[hunt.target][0]}</span>`;
+  hunt.root.querySelector('.score').textContent=`Trafienia: ${hunt.hits} / 6`;
+}
+function stopHunt(){hunt=null;renderHunt();}
+const p6=parts(6,2);
+function renderHunt(){
+  const r=$('#g6a');
+  r.innerHTML=`<div class="q"><p class="q-t">Klio poda nazwę części, a Ty kliknij ją na rysunku mikroskopu powyżej. Znajdź 6 części.</p><p class="fb"></p></div><div class="foot"><button class="btn start">Start</button><span class="score"></span></div>`;
+  r.querySelector('.start').onclick=()=>{r.querySelector('.start').hidden=true;hunt={root:r,hits:0,pool:shuffle(Object.keys(PARTS)),target:null};
+    document.querySelectorAll('#parts button').forEach(b=>b.setAttribute('aria-pressed','false'));
+    info.innerHTML='<span class="small">Trwa gra. Opisy części wrócą po jej zakończeniu.</span>';
+    nextHunt();scope.scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'});};
+}
+renderHunt();
+function mag(){
+  const a=+$('#m-ok').value,b=+$('#m-ob').value,m=a*b;
+  $('#m-out').textContent=`Powiększenie: ${m}×`;
+  $('#m-why').textContent=`${a}× (okular) · ${b}× (obiektyw) = ${m}×. ${m>=300?'Widać jądra komórkowe, te ciemne kropki!':m>=100?'Komórki wyglądają jak cegiełki w murze.':'Komórki są malutkie. Zwiększ powiększenie!'}`;
+  document.getElementById('cells').setAttribute('patternTransform',`translate(100 100) scale(${m/120})`);
+}
+$('#m-ok').addEventListener('change',mag);$('#m-ob').addEventListener('change',mag);mag();
+mcq($('#g6b'),[
+ {q:'Okular 10×, obiektyw 40×. Jakie jest powiększenie?',o:['50×','400×','4000×'],a:1,w:'10 · 40 = 400. Mnożymy, a nie dodajemy!'},
+ {q:'Okular 15×, obiektyw 10×. Jakie jest powiększenie?',o:['150×','25×','1510×'],a:0},
+ {q:'Od jakiego powiększenia zaczynamy obserwację?',o:['od największego','od najmniejszego','to nie ma znaczenia'],a:1},
+ {q:'Jak przenosimy mikroskop?',o:['za tubus jedną ręką','oburącz: za statyw i pod podstawę','za okular'],a:1},
+ {q:'Czym przykrywamy kroplę wody z preparatem?',o:['szkiełkiem nakrywkowym','szkiełkiem podstawowym','łapkami'],a:0}
+],()=>p6('b'));
+
+/* 7 compass */
+const p7=parts(7,2);
+(function(){
+  const dial=$('#dial'),rot=$('#rot'),needle=$('#needle'),status=$('#cmp-status');let oriented=false,wt;
+  function set(v,user){
+    v=((+v+540)%360)-180;
+    if(Math.abs(v)<=6)v=0;
+    rot.value=v;dial.setAttribute('transform',`rotate(${v} 200 200)`);
+    if(user&&!reduce){needle.classList.remove('wob');void needle.getBoundingClientRect();needle.classList.add('wob');}
+    if(v===0&&!oriented){oriented=true;status.textContent='Kompas zorientowany! Teraz odczytaj kierunki.';status.classList.add('ok');
+      const g=$('#g7a');g.hidden=false;startQ(g);}
+    else if(v!==0&&!oriented){status.textContent=`Kompas nie jest jeszcze zorientowany. Litera N jest o ${Math.abs(v)}° od igły.`;}
+  }
+  rot.addEventListener('input',()=>set(rot.value,true));
+  $('#rot-l').onclick=()=>set(+rot.value-15,true);$('#rot-r').onclick=()=>set(+rot.value+15,true);
+  set([120,-135,75,-60,150][Math.floor(Math.random()*5)],false);
+  const D=['północ (N)','północny wschód (NE)','wschód (E)','południowy wschód (SE)','południe (S)','południowy zachód (SW)','zachód (W)','północny zachód (NW)'];
+  const opt=(right,others)=>{const o=shuffle([right,...others]);return {o:o.map(i=>D[i]),a:o.indexOf(right)};};
+  function startQ(g){
+    mcq(g,[
+     {q:'W którym kierunku od biwaku leży jezioro?',...opt(2,[6,0,3])},
+     {q:'W którym kierunku od biwaku leży wieś?',...opt(4,[0,2,5])},
+     {q:'Idziesz z biwaku do lasu. W którym kierunku idziesz?',...opt(6,[2,7,5])},
+     {q:'W którym kierunku od biwaku stoi wieża? Uwaga, to kierunek pośredni!',...opt(1,[0,2,7]),w:'Wieża jest między północą (góry) a wschodem (jezioro).'},
+     {q:'Z gór wracasz prosto na biwak. W którym kierunku idziesz?',...opt(4,[0,2,6]),w:'Góry są na północ od biwaku, więc wracając, idziesz na południe.'}
+    ],()=>p7('a'));
+  }
+})();
+mcq($('#g7b'),[
+ {q:'Rano Słońce widzimy po stronie…',o:['wschodniej','zachodniej','północnej'],a:0},
+ {q:'W południe cień patyka (gnomonu) wskazuje…',o:['południe','północ','wschód'],a:1,w:'Słońce jest wtedy na południu, a cień pada w przeciwną stronę.'},
+ {q:'Wieczorem Słońce zachodzi po stronie…',o:['wschodniej','południowej','zachodniej'],a:2},
+ {q:'Gdzie najlepiej położyć kompas?',o:['poziomo, z dala od metalu i magnesów','na metalowej skrzynce','obok włączonego telefonu'],a:0,w:'Metal i magnesy przyciągają igłę i zmieniają jej wskazania.'}
+],()=>p7('b'));
+
+/* final quiz */
+const POOL=[
+ {t:1,q:'Który element należy do przyrody nieożywionej?',o:['kamień','grzyb','pies','dąb']},
+ {t:1,q:'Co NIE jest elementem przyrody?',o:['ławka w parku','motyl','woda w rzece','powietrze']},
+ {t:1,q:'Grzyby należą do przyrody…',o:['ożywionej','nieożywionej','wytworzonej przez człowieka','żadnej']},
+ {t:1,q:'Która cecha dotyczy organizmów żywych?',o:['rozmnażają się','są twarde','są zrobione z metalu','nigdy się nie zmieniają']},
+ {t:2,q:'Które miejsce jest najlepsze do nauki?',o:['ciche, jasne i przewietrzone','przy włączonym telewizorze','w łóżku przy zgaszonym świetle','w hałaśliwym autobusie']},
+ {t:2,q:'Co pomaga zapamiętać materiał?',o:['powtarzanie przez kilka dni','nauka całą noc przed sprawdzianem','przeczytanie tylko raz','nauka bez przerw przez 4 godziny']},
+ {t:2,q:'Mapa myśli to…',o:['notatka z tematem w środku i gałęziami z hasłami','mapa samochodowa','plan lekcji','rysunek kompasu']},
+ {t:2,q:'Kto najlepiej uczy się przez działanie i ruch?',o:['czuciowiec','wzrokowiec','słuchowiec','nikt']},
+ {t:3,q:'Zasada 20-20-20: co 20 minut patrz przez 20 sekund…',o:['na coś odległego o ok. 6 metrów','w ekran z bliska','na klawiaturę','na Słońce']},
+ {t:3,q:'Kiedy najlepiej odłożyć telefon wieczorem?',o:['ok. godzinę przed snem','dopiero w łóżku','po zgaszeniu światła','wcale']},
+ {t:3,q:'Co może być skutkiem zbyt długiego siedzenia przed ekranem?',o:['wada postawy i zmęczone oczy','lepszy wzrok','silniejsze mięśnie','dłuższy sen']},
+ {t:3,q:'Ile czasu dziennie dzieci powinny się ruszać?',o:['co najmniej 60 minut','5 minut','15 minut','nie trzeba']},
+ {t:4,q:'Którym zmysłem rozpoznasz śpiew ptaka?',o:['słuchem','węchem','smakiem','dotykiem']},
+ {t:4,q:'Czego NIE wolno robić z nieznaną rośliną?',o:['smakować jej','oglądać przez lupę','fotografować','rysować']},
+ {t:4,q:'Ptaka na odległym drzewie obejrzysz przez…',o:['lornetkę','mikroskop','lupę','wagę']},
+ {t:4,q:'Temperaturę powietrza mierzymy…',o:['termometrem','kompasem','lornetką','lupą']},
+ {t:4,q:'Obserwacja polega na…',o:['uważnym przyglądaniu się bez zmieniania warunków','celowym zmienianiu warunków','ważeniu przedmiotów','zgadywaniu']},
+ {t:4,q:'Wynik pomiaru zapisujemy zawsze…',o:['z jednostką, np. cm, °C','rysunkiem','jako pytanie','jako hipotezę']},
+ {t:5,q:'Hipoteza to…',o:['przypuszczalna odpowiedź na pytanie badawcze','wynik pomiaru','przyrząd do obserwacji','część mikroskopu']},
+ {t:5,q:'Próba kontrolna to zestaw, w którym…',o:['niczego nie zmieniamy','zmieniamy jeden warunek','zmieniamy wszystkie warunki','nie ma roślin']},
+ {t:5,q:'Wniosek formułujemy…',o:['na końcu, po zapisaniu wyników','przed doświadczeniem','zamiast hipotezy','zanim zadamy pytanie']},
+ {t:5,q:'W próbie badawczej zmieniamy…',o:['tylko jeden warunek','wszystko naraz','nic','wszystko oprócz roślin']},
+ {t:6,q:'Przez którą część mikroskopu patrzymy?',o:['okular','obiektyw','stolik','lusterko']},
+ {t:6,q:'Okular 10×, obiektyw 40×. Jakie jest powiększenie?',o:['400×','50×','40×','4000×']},
+ {t:6,q:'Okular 10×, obiektyw 10×. Jakie jest powiększenie?',o:['100×','20×','1000×','10×']},
+ {t:6,q:'Do dokładnego ustawienia ostrości służy śruba…',o:['mikrometryczna','makrometryczna','rewolwerowa','stolikowa']},
+ {t:6,q:'Na której części mikroskopu kładziemy preparat?',o:['na stoliku','na okularze','na rewolwerze','na tubusie']},
+ {t:6,q:'Obserwację pod mikroskopem zaczynamy od…',o:['najmniejszego powiększenia','największego powiększenia','wyjęcia okularu','zgaszenia światła']},
+ {t:7,q:'Ciemny (czerwony) koniec igły kompasu wskazuje…',o:['północ','południe','wschód','zachód']},
+ {t:7,q:'Rano Słońce jest po stronie…',o:['wschodniej','zachodniej','północnej','południowej']},
+ {t:7,q:'W południe cień patyka wskazuje…',o:['północ','południe','wschód','zachód']},
+ {t:7,q:'Kierunek pośredni między północą a wschodem to…',o:['północny wschód (NE)','południowy wschód (SE)','północny zachód (NW)','zachód (W)']},
+ {t:7,q:'Literą W na kompasie oznaczamy…',o:['zachód','wschód','północ','południe']},
+ {t:7,q:'Dlaczego kompas trzymamy z dala od metalu?',o:['bo igła może pokazać zły kierunek','bo się zarysuje','bo zrobi się ciężki','bo przestanie świecić']},
+ {t:7,q:'Nocą północ wskazuje…',o:['Gwiazda Polarna','Księżyc','każda jasna gwiazda','mech na drzewie']}
+];
+const GRADES=[[15,'6','celujący','Klio aż zahukała z zachwytu!'],[13,'5','bardzo dobry','Świetna robota!'],[11,'4','dobry','Dobrze! Jeszcze mała powtórka i będzie piątka.'],
+ [8,'3','dostateczny','Nieźle, ale warto powtórzyć tematy z listy.'],[5,'2','dopuszczający','Powtórz tematy z listy i spróbuj jeszcze raz.'],[0,'1','niedostateczny','Nie szkodzi! Przejdź przystanki jeszcze raz i wróć tutaj.']];
+(function(){
+  const root=$('#final');let qs,i,score,wrong;
+  function start(){qs=shuffle(POOL).slice(0,15).map(q=>({...q,opts:shuffle(q.o)}));i=0;score=0;wrong=[];show();}
+  function show(){const q=qs[i];
+    root.innerHTML=`<div class="quiz-card"><div class="quiz-top"><span>Pytanie ${i+1} z 15</span><span>Punkty: ${score}</span></div>
+      <div class="meter"><span style="width:${i/15*100}%"></span></div>
+      <p class="quiz-q">${q.q}</p><div class="opts">${q.opts.map(o=>`<button class="opt">${o}</button>`).join('')}</div>
+      <p class="fb" hidden></p><div class="foot"><button class="btn nx" hidden>${i<14?'Dalej':'Zobacz wynik'}</button></div></div>`;}
+  function end(){
+    if(best==null||score>best){best=score;save();paint();}
+    const g=GRADES.find(g=>score>=g[0]);const topics=[...new Set(wrong.map(w=>w.t))].sort((a,b)=>a-b);
+    root.innerHTML=`<div class="quiz-card"><p class="small">Twój wynik</p><div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap">
+      <span class="grade">${score} / 15</span><span><span class="quiz-q">Ocena: ${g[1]} (${g[2]})</span><br><span class="hand">${g[3]}</span></span></div>
+      ${topics.length?`<p><b>Do powtórki:</b></p><ul class="review">${topics.map(t=>`<li><a href="#t${t}">${t}. ${SHORT[t-1]}</a></li>`).join('')}</ul>
+      <p><b>Pytania z błędem:</b></p><ul class="review">${wrong.map(w=>`<li>${w.q} <b>${w.o[0]}</b></li>`).join('')}</ul>`:'<p>Bez ani jednego błędu. Jesteś gotowy na sprawdzian!</p>'}
+      <div class="foot"><button class="btn re">Nowe losowanie pytań</button></div></div>`;
+    if(score>=13)confetti(160);
+  }
+  root.onclick=e=>{
+    if(e.target.closest('.re')){start();root.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});return;}
+    if(e.target.closest('.nx')){i++;i<15?show():end();return;}
+    const b=e.target.closest('.opt');if(!b||b.disabled)return;
+    const q=qs[i],ok=b.textContent===q.o[0];
+    root.querySelectorAll('.opt').forEach(x=>{x.disabled=true;if(x.textContent===q.o[0])x.classList.add('right');});
+    if(ok)score++;else{b.classList.add('wrong');wrong.push(q);}
+    const fb=root.querySelector('.fb');fb.hidden=false;
+    fb.innerHTML=ok?'<b class="ok">Dobrze!</b>':`<b class="no">Niestety.</b> Poprawna odpowiedź: <b>${q.o[0]}</b>`;
+    root.querySelector('.quiz-top span:last-child').textContent=`Punkty: ${score}`;
+    const nx=root.querySelector('.nx');nx.hidden=false;nx.focus();
+  };
+  start();
+})();
+
+function confetti(n){
+  if(reduce)return;const cv=$('#confetti');cv.hidden=false;const ctx=cv.getContext('2d');
+  const W=cv.width=innerWidth,H=cv.height=innerHeight;const cols=['#f2a516','#1f6f5c','#2e8f45','#cc3b2b','#7fd1b4'];
+  const ps=Array.from({length:n},()=>({x:W/2+(Math.random()-.5)*W*.4,y:H*.35,vx:(Math.random()-.5)*10,vy:-Math.random()*10-4,r:Math.random()*6+4,c:cols[Math.random()*5|0],a:Math.random()*6}));
+  let f=0;(function tick(){ctx.clearRect(0,0,W,H);ps.forEach(p=>{p.vy+=.35;p.x+=p.vx;p.y+=p.vy;p.a+=.2;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.a);ctx.fillStyle=p.c;ctx.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);ctx.restore();});
+    if(++f<110)requestAnimationFrame(tick);else{ctx.clearRect(0,0,W,H);cv.hidden=true;}})();
+}
+paint();
+})();
+</script>
+
+</body></html>
